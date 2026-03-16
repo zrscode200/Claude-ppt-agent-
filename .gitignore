@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# PPT Studio
+node_modules/
+output/
+.ppt/logs/
+.ppt/decks/*/v*/slides/
+*.pdf
+.superpowers/

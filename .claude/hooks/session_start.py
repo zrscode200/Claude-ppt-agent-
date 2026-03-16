@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Session start hook — detects active decks and their current phase."""
+
+import json
+import sys
+from pathlib import Path
+
+
+def detect_phase(deck_dir: Path) -> str:
+    """Detect the current workflow phase for a deck."""
+    versions = sorted(deck_dir.glob("v*/"), key=lambda p: p.name)
+
+    if versions:
+        latest = versions[-1]
+        qa_review = latest / "qa-review.md"
+        pptx_files = list(latest.glob("*.pptx"))
+
+        if qa_review.exists():
+            return f"QA complete ({latest.name})"
+        elif pptx_files:
+            return f"Built, needs QA ({latest.name})"
+
+    if (deck_dir / "spec-approved.md").exists():
+        return "Spec approved, ready to build"
+
+    drafts = sorted(deck_dir.glob("spec-draft-*.md"))
+    if drafts:
+        return f"Brainstorming ({drafts[-1].name})"
+
+    edit_drafts = sorted(deck_dir.glob("edit-spec-draft-*.md"))
+    if edit_drafts:
+        return f"Edit spec in progress ({edit_drafts[-1].name})"
+
+    return "New deck (no artifacts)"
+
+
+def main():
+    project_dir = Path.cwd()
+    decks_dir = project_dir / ".ppt" / "decks"
+    context_parts = []
+
+    if decks_dir.exists():
+        for deck_dir in sorted(decks_dir.iterdir()):
+            if deck_dir.is_dir():
+                phase = detect_phase(deck_dir)
+                context_parts.append(f"Deck '{deck_dir.name}': {phase}")
+
+    if context_parts:
+        output = {
+            "additionalContext": "Active decks:\n" + "\n".join(f"  - {p}" for p in context_parts)
+        }
+    else:
+        output = {
+            "additionalContext": "No active decks. Start with /create-deck or /quick-deck."
+        }
+
+    print(json.dumps(output))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        print(json.dumps({}))
+        sys.exit(0)

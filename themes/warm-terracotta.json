@@ -1,0 +1,19 @@
+{
+  "name": "Warm Terracotta",
+  "colors": {
+    "primary": "B85042",
+    "secondary": "E7E8D1",
+    "accent": "A7BEAE",
+    "bg_dark": "6B3028",
+    "bg_light": "F5F5EE",
+    "text_on_dark": "E7E8D1",
+    "text_on_light": "4A2C23",
+    "muted": "C4A98B"
+  },
+  "fonts": {
+    "header": "Cambria",
+    "body": "Calibri"
+  },
+  "chart_colors": ["B85042", "A7BEAE", "E7E8D1", "D4856A"],
+  "background_strategy": "dark-sandwich"
+}

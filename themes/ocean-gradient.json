@@ -1,0 +1,19 @@
+{
+  "name": "Ocean Gradient",
+  "colors": {
+    "primary": "065A82",
+    "secondary": "1C7293",
+    "accent": "21295C",
+    "bg_dark": "0A1628",
+    "bg_light": "F0F6FA",
+    "text_on_dark": "CADCFC",
+    "text_on_light": "065A82",
+    "muted": "6B8FA3"
+  },
+  "fonts": {
+    "header": "Georgia",
+    "body": "Calibri"
+  },
+  "chart_colors": ["065A82", "1C7293", "21295C", "4DA8C4"],
+  "background_strategy": "all-dark"
+}
