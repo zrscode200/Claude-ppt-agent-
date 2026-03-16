@@ -18,18 +18,31 @@ Activate when the user's intent involves PowerPoint presentations:
 
 ## Routing
 
-Route user intent to the appropriate command:
+Route user intent to the appropriate command. Try fundamentals first, then composed commands:
 
-| Intent Pattern | Command | Notes |
-|---------------|---------|-------|
-| Wants a new presentation, willing to brainstorm | `/create-deck` | Spec-driven, thorough |
-| Wants a quick deck, minimal back-and-forth | `/quick-deck` | Fast, no spec file |
-| Has an existing `.pptx` to improve or edit | `/improve-deck` | Direct or spec-driven edits |
-| Wants feedback on a deck, no changes | `/review-deck` | Analysis + report only |
-| Wants visual QA on slides | `/qa-slides` | Convert + inspect |
-| Has a document/notes to turn into slides | `/deck-from-doc` | Parse → spec → build |
+### Fundamental Commands
 
-**Ambiguous intent?** Default to `/create-deck` for new work, `/improve-deck` for existing files.
+| Intent | Command | Mode/Scope |
+|--------|---------|------------|
+| "review this deck", "what do you think" | `/review` | Full scope |
+| "check the visuals", "QA this" | `/review` | Style scope |
+| "is the messaging right", "check the flow" | `/review` | Content scope |
+| "just make slides about X", "quick deck" | `/create` | Direct mode |
+| "fix spacing on slide 3", "change the title font" | `/edit` | Direct mode |
+| "redesign the data section" | `/edit` | Plan mode |
+
+### Composed Commands
+
+| Intent | Command | Composition |
+|--------|---------|-------------|
+| New deck, wants to brainstorm | `/create-deck` | Conversation → `/create` (plan) |
+| Improve an existing deck | `/improve-deck` | `/review` → `/edit` |
+| Turn a document into slides | `/deck-from-doc` | `/review` (doc) → `/create` |
+
+**Ambiguous intent?**
+- New work → `/create-deck`
+- Existing file → `/improve-deck`
+- "Quick" or "just do it" → `/create` (direct mode) or `/edit` (direct mode)
 
 ## Workflow Engine
 
@@ -39,18 +52,17 @@ Track the current deck and phase. Artifacts live in `.ppt/decks/<deck-name>/`.
 
 **Phase detection** (for resuming work):
 ```
-if v<n>/qa-review.md exists           → QA complete, ready for next edition or delivery
-elif v<n>/<deck>.pptx exists          → Build complete, needs QA
-elif spec-approved.md exists          → Spec approved, ready to build
+if v<n>/<deck>.pptx exists
+  and review-<n>.md exists (post-build) → QA complete, ready for delivery or next edition
+elif v<n>/<deck>.pptx exists             → Build complete, needs QA (Review)
 elif content-plan-approved.md exists
-  and style-plan-approved.md exists   → Both plans approved, ready for spec
-elif content-plan-approved.md exists  → Content plan approved, style plan pending (or skipped)
-elif style-plan-approved.md exists    → Style plan approved, content plan pending (or skipped)
+  or style-plan-approved.md exists       → Plan(s) approved, ready to build
 elif content-plan-draft-*.md exists
-  or style-plan-draft-*.md exists     → Planning in progress
+  or style-plan-draft-*.md exists        → Planning in progress
 elif edit-content-plan-draft-*.md exists
-  or edit-style-plan-draft-*.md exists → Edit planning in progress
-else                                  → New deck, start from scratch
+  or edit-style-plan-draft-*.md exists   → Edit planning in progress
+elif review-*.md exists (no versions)    → Review complete, waiting for next action
+else                                     → New deck, start from scratch
 ```
 
 ### Deck Naming
@@ -71,7 +83,7 @@ Detect current version: find the highest `v<n>/` folder. New builds go to `v<n+1
 
 For the first build, use `v1/`.
 
-### Plan & Spec Lifecycle
+### Plan Lifecycle
 
 **Planning (order-independent, individually optional):**
 1. During conversation, detect whether user focuses on content or style
@@ -80,11 +92,9 @@ For the first build, use `v1/`.
 4. If user requests changes, write `*-draft-2.md` (never overwrite)
 5. When user approves a plan, copy to `*-approved.md`
 6. Repeat for the other plan, or skip if user wants to move forward
+7. At least one plan must be approved before building
 
-**Spec:**
-7. When at least one plan is approved, write `spec-approved.md` (thin doc referencing plans + build details)
-
-**Edit plans (for `/improve-deck`):**
+**Edit plans (for `/edit` in plan mode):**
 - Content-only change → `edit-content-plan-draft-<n>.md` only
 - Style-only change → `edit-style-plan-draft-<n>.md` only
 - Both → both edit plans
@@ -119,9 +129,9 @@ For improving existing decks with >3 slides to edit:
 3. **Clean + pack** after all edits complete
 4. **Output** to next version folder
 
-### QA Phase
+### QA Phase (Review as sub-action)
 
-Always use a sub-agent:
+Always use a sub-agent for visual QA:
 
 1. **Convert** to images: `python scripts/soffice.py <deck>.pptx --output-dir slides/`
 2. **Spawn `qa-reviewer` agent** with:
@@ -132,7 +142,7 @@ Always use a sub-agent:
    - If a plan was skipped, use markitdown extraction or defaults instead
 3. **Fix** reported issues
 4. **Re-verify** affected slides (spawn another QA agent if needed)
-5. **Save** findings to `v<n>/qa-review.md`
+5. **Save** findings to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ## References
 
