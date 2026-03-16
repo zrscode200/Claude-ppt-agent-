@@ -94,11 +94,11 @@ For content-only or style-only reviews, include only the relevant sections.
 
 ## Artifact Output
 
-Save the review report to `.ppt/decks/<deck-name>/review-<n>.md` (increment `<n>` — never overwrite previous reviews).
+**For `.pptx` input:** Save the review report to `.ppt/decks/<deck-name>/review-<n>.md` (increment `<n>` — never overwrite previous reviews). If the deck is not yet tracked in `.ppt/decks/`, create a deck folder from the filename.
 
-If the deck is not yet tracked in `.ppt/decks/`, create a deck folder from the filename.
+**For document/text input (standalone):** Present the review in the conversation. Only persist to a deck folder if this Review is part of a composed workflow (e.g., `/deck-from-doc`) where a deck will be created.
 
-If this Review is part of a composed workflow (e.g., feeding into Edit or Create), the report is still saved — it serves as audit trail.
+If this Review is part of a composed workflow, the report is always saved — it serves as audit trail.
 
 ## Scoring Guide
 

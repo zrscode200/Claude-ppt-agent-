@@ -71,6 +71,8 @@ Each action supports two modes:
 
 Mode is detected from context — composed commands may override (e.g., `/create-deck` always uses plan mode).
 
+Autonomy modes (configured in `.ppt/config.md`) affect when the agent pauses for user input. In **gated** mode (default), pause at plan approval gates and final delivery. In **supervised** mode, pause before every significant action. In **autonomous** mode, only pause for ambiguity. Each fundamental command should respect the active autonomy mode when deciding whether to proceed or wait for confirmation.
+
 ## Artifacts
 
 Four artifact types, produced by different actions:

@@ -47,8 +47,8 @@ System files (refreshed with --update):
   package.json, requirements.txt
 
 User files (never overwritten):
-  .ppt/config.md, .claude/settings.local.json, .ppt/decks/*,
-  templates/*, assets/*
+  .ppt/config.md, .claude/settings.local.json, .ppt/decks/*
+  (plans, reviews, builds), templates/*, assets/*
 HELP
   exit 0
 fi

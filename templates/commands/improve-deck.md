@@ -44,18 +44,10 @@ See `/edit` for the full flow.
 - Report the file path and changelog
 - Offer further refinement
 
-## Deck Registration
-
-If the `.pptx` file is not already tracked in `.ppt/decks/`:
-1. Create a deck folder from the filename (kebab-case)
-2. Copy the original `.pptx` to `v1/` as the baseline
-3. Edits go to `v2/`
-
-If already tracked, find the latest version and increment.
-
 ## What this adds over `/edit` alone
 
 - The Review step first — understand the deck before changing it
 - Presents findings to the user for context
-- Handles deck registration for untracked files
 - Natural entry point for "improve this deck" intent
+
+Note: deck registration (creating a folder for untracked files, copying original to v1) is handled by `/edit`.

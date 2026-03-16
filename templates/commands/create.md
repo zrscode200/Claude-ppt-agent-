@@ -75,8 +75,8 @@ Run a Review (style scope) on the built deck:
 1. Convert to images: `python scripts/soffice.py <deck>.pptx --output-dir v<n>/slides/`
 2. Spawn `qa-reviewer` sub-agent with:
    - Slide images
-   - Content plan (for completeness checks)
-   - Style plan (for visual consistency checks)
+   - Content plan for completeness checks (plan mode), or markitdown extraction (direct mode)
+   - Style plan for visual consistency checks (plan mode), or visual inspection only (direct mode)
 3. Fix reported issues
 4. Re-verify affected slides
 5. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
