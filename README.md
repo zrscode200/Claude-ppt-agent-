@@ -59,16 +59,14 @@ This updates scripts, commands, skills, agents, hooks, and themes. Your plans, d
 - **Python 3.12+**
 - **Node.js / npm**
 
-### Optional (for high-fidelity slide rendering)
+### Optional (higher-fidelity QA rendering)
+
+LibreOffice and Poppler produce higher-fidelity slide images for visual QA, but **everything works without them** — the built-in python-pptx renderer handles QA inspection fine. These require admin/system-level installation, so skip them if your environment is locked down.
 
 | Tool | macOS | Linux / WSL | Windows |
 |------|-------|-------------|---------|
 | **LibreOffice** | `brew install --cask libreoffice` | `sudo apt install libreoffice` | `choco install libreoffice-fresh` or [libreoffice.org](https://www.libreoffice.org/) |
 | **Poppler** | `brew install poppler` | `sudo apt install poppler-utils` | `choco install poppler` or [GitHub release](https://github.com/oschwartz10612/poppler-windows) |
-
-Without LibreOffice/Poppler, thumbnail generation falls back to a basic python-pptx renderer.
-
-The bootstrap script auto-detects your platform and shows the right install commands.
 
 ## Target Repo Structure
 

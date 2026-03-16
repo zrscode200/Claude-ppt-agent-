@@ -362,20 +362,18 @@ def setup_npm(target: Path, update_mode: bool) -> None:
 
 def check_system_dependencies() -> bool:
     """Check and report optional system dependencies. Returns whether soffice was found."""
-    print("\nSystem dependencies:")
+    print("\nOptional enhancements:")
 
     soffice = find_soffice()
     if soffice:
-        print("  LibreOffice: found")
+        print("  LibreOffice: found (high-fidelity slide rendering)")
     else:
-        print("  LibreOffice: NOT FOUND (optional — needed for visual QA)")
-        print(f"    Install: {install_hint('libreoffice')}")
+        print("  LibreOffice: not installed (using built-in renderer — works fine)")
 
     if shutil.which("pdftoppm"):
         print("  Poppler (pdftoppm): found")
-    else:
-        print("  Poppler (pdftoppm): NOT FOUND (optional — needed for visual QA)")
-        print(f"    Install: {install_hint('poppler')}")
+    elif soffice:
+        print("  Poppler (pdftoppm): not installed (needed alongside LibreOffice)")
 
     return soffice is not None
 
@@ -405,9 +403,8 @@ def print_summary(target: Path, update_mode: bool, soffice_found: bool) -> None:
 
     if not soffice_found:
         print()
-        print("Note: Install LibreOffice + Poppler for high-fidelity slide")
-        print("rendering and visual QA. Without them, thumbnail.py uses")
-        print("a basic fallback renderer.")
+        print("Note: QA visual inspection uses a built-in renderer.")
+        print("For higher fidelity, install LibreOffice + Poppler (requires admin).")
 
     print("=" * 64)
 
