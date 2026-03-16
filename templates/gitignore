@@ -1,0 +1,9 @@
+# PPT Studio
+.venv/
+node_modules/
+output/
+.ppt/logs/
+.ppt/decks/*/v*/slides/
+*.pdf
+__pycache__/
+*.py[codz]
