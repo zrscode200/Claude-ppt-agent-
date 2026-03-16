@@ -10,21 +10,30 @@ A bootstrap toolkit that turns any directory into a Claude Code-powered presenta
 
 Then open Claude Code in the target directory and use:
 
+### Fundamental Commands
+
 | Command | Purpose |
 |---------|---------|
-| `/create-deck` | Spec-driven presentation creation (brainstorm → spec → build → QA) |
-| `/quick-deck` | Fast creation without a spec |
-| `/improve-deck` | Edit or redesign an existing `.pptx` |
-| `/review-deck` | Get a feedback report on a deck (no changes) |
-| `/qa-slides` | Visual quality inspection |
-| `/deck-from-doc` | Turn a document or notes into slides |
+| `/review` | Analyze a deck, document, or slide images — produce a review report |
+| `/create` | Build new slides (plan mode for iterating, direct mode for speed) |
+| `/edit` | Modify existing slides (plan mode for broad changes, direct for quick fixes) |
+
+### Composed Commands
+
+| Command | Composition | Purpose |
+|---------|-------------|---------|
+| `/create-deck` | Conversation → `/create` | Full brainstorm + plan-driven creation |
+| `/improve-deck` | `/review` → `/edit` | Review a deck then apply improvements |
+| `/deck-from-doc` | `/review` → `/create` | Turn a document into slides |
+
+Or just describe what you want — the skill routes your intent to the right command.
 
 ## What Gets Installed
 
 The bootstrap script stamps the target directory with:
 
 - **CLAUDE.md** — Agent operating manual (primes Claude as a PPT specialist)
-- **6 slash commands** — Workflows for creating, editing, and reviewing decks
+- **6 slash commands** — 3 fundamental actions + 3 composed workflows
 - **3 agent definitions** — Sub-agents for parallel slide building, editing, and QA
 - **1 skill** — Intent routing (auto-triggers on PPT-related requests)
 - **2 hooks** — Session context injection (active decks, current phase)
@@ -41,7 +50,7 @@ To refresh system files without touching your work:
 ./bootstrap/init-ppt-studio.sh /path/to/your/project --update
 ```
 
-This updates scripts, commands, skills, agents, hooks, and themes. Your specs, decks, config, and custom templates are preserved.
+This updates scripts, commands, skills, agents, hooks, and themes. Your plans, decks, config, and custom templates are preserved.
 
 ## Requirements
 
@@ -60,7 +69,7 @@ After bootstrapping, the target directory contains:
 your-project/
 ├── CLAUDE.md                        # Agent operating manual
 ├── .claude/
-│   ├── commands/                    # 6 slash commands
+│   ├── commands/                    # 6 slash commands (3 fundamental + 3 composed)
 │   ├── skills/ppt-studio/          # Skill + reference docs
 │   ├── agents/                      # Sub-agent definitions
 │   ├── hooks/                       # Session hooks
@@ -69,12 +78,12 @@ your-project/
 │   ├── config.md                    # Autonomy mode, defaults
 │   ├── decks/                       # Per-deck artifacts
 │   │   └── <deck-name>/
-│   │       ├── spec-draft-*.md      # Brainstorm iterations
-│   │       ├── spec-approved.md     # Approved spec
+│   │       ├── content-plan-*.md    # Content plan drafts + approved
+│   │       ├── style-plan-*.md      # Style plan drafts + approved
+│   │       ├── review-*.md          # Review reports
 │   │       ├── v1/                  # Edition 1
 │   │       │   ├── deck.pptx
-│   │       │   ├── slides/          # QA images
-│   │       │   └── qa-review.md
+│   │       │   └── slides/          # Slide images
 │   │       └── v2/                  # Edition 2 (with changelog)
 │   └── logs/                        # Hook logs (gitignored)
 ├── scripts/                         # Utility scripts
@@ -84,22 +93,31 @@ your-project/
 └── output/                          # Generated presentations
 ```
 
+## Architecture
+
+Three layers:
+
+1. **Fundamental actions** (`/review`, `/create`, `/edit`) — atomic building blocks
+2. **Composed commands** (`/create-deck`, `/improve-deck`, `/deck-from-doc`) — pre-wired workflows
+3. **Skill routing** — detects user intent and picks the right command
+
+Each action supports **plan mode** (iterate on content/style plans before building) or **direct mode** (just do it). Four artifact types track decisions: content plans, style plans, review reports, and changelogs.
+
 ## Workflows
 
-### Spec-Driven Creation
+### Creating a Deck
 
 1. User describes what they want
-2. Claude brainstorms (adaptive: freeform → checklist)
-3. Writes a spec → user reviews and approves
-4. Sub-agents build slides in parallel (for decks >5 slides)
-5. QA sub-agent inspects with fresh eyes
-6. Fix-and-verify loop until clean
-7. Deliver final `.pptx`
+2. Agent and user collaboratively build a content plan and/or style plan
+3. Plans approved → sub-agents build slides in parallel (for decks >5 slides)
+4. QA sub-agent inspects with fresh eyes
+5. Fix-and-verify loop until clean
+6. Deliver final `.pptx`
 
 ### Improving Existing Decks
 
 - **Direct mode**: Small changes applied immediately
-- **Spec-driven mode**: Broader redesigns go through an edit spec → approve → apply cycle
+- **Plan mode**: Broader redesigns go through edit plan(s) → approve → apply cycle
 - Each improvement creates a new version (`v2/`, `v3/`) with a changelog
 
 ### Visual QA

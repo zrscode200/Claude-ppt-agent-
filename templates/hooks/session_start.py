@@ -13,16 +13,15 @@ def detect_phase(deck_dir: Path) -> str:
 
     if versions:
         latest = versions[-1]
-        qa_review = latest / "qa-review.md"
         pptx_files = list(latest.glob("*.pptx"))
 
-        if qa_review.exists():
-            return f"QA complete ({latest.name})"
-        elif pptx_files:
-            return f"Built, needs QA ({latest.name})"
-
-    if (deck_dir / "spec-approved.md").exists():
-        return "Spec approved, ready to build"
+        if pptx_files:
+            # Check if a post-build review exists
+            reviews = sorted(deck_dir.glob("review-*.md"))
+            if reviews:
+                return f"QA complete ({latest.name})"
+            else:
+                return f"Built, needs QA ({latest.name})"
 
     # Check plan status
     content_approved = (deck_dir / "content-plan-approved.md").exists()
@@ -30,17 +29,23 @@ def detect_phase(deck_dir: Path) -> str:
     content_drafts = sorted(deck_dir.glob("content-plan-draft-*.md"))
     style_drafts = sorted(deck_dir.glob("style-plan-draft-*.md"))
 
-    if content_approved and style_approved:
-        return "Both plans approved, ready for spec"
-    elif content_approved and style_drafts:
-        return f"Content plan approved, style planning ({style_drafts[-1].name})"
-    elif style_approved and content_drafts:
-        return f"Style plan approved, content planning ({content_drafts[-1].name})"
-    elif content_approved:
-        return "Content plan approved, style plan pending"
-    elif style_approved:
-        return "Style plan approved, content plan pending"
-    elif content_drafts or style_drafts:
+    if content_approved or style_approved:
+        parts = []
+        if content_approved:
+            parts.append("content")
+        if style_approved:
+            parts.append("style")
+        approved = " + ".join(parts)
+
+        # Check if still drafting the other plan
+        if content_approved and style_drafts:
+            return f"Content approved, style planning ({style_drafts[-1].name})"
+        elif style_approved and content_drafts:
+            return f"Style approved, content planning ({content_drafts[-1].name})"
+        else:
+            return f"Plan(s) approved ({approved}), ready to build"
+
+    if content_drafts or style_drafts:
         latest_draft = (content_drafts + style_drafts)[-1]
         return f"Planning ({latest_draft.name})"
 
@@ -50,6 +55,11 @@ def detect_phase(deck_dir: Path) -> str:
     if edit_content_drafts or edit_style_drafts:
         latest_edit = (edit_content_drafts + edit_style_drafts)[-1]
         return f"Edit planning ({latest_edit.name})"
+
+    # Check if only reviews exist (reviewed but no plans or builds yet)
+    reviews = sorted(deck_dir.glob("review-*.md"))
+    if reviews:
+        return f"Reviewed ({reviews[-1].name})"
 
     return "New deck (no artifacts)"
 
@@ -71,7 +81,7 @@ def main():
         }
     else:
         output = {
-            "additionalContext": "No active decks. Start with /create-deck or /quick-deck."
+            "additionalContext": "No active decks. Start with /create-deck, /create, or /review."
         }
 
     print(json.dumps(output))
