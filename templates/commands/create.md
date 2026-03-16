@@ -64,8 +64,8 @@ Same iteration flow → `style-plan-approved.md`.
 2. Create deck folder: `.ppt/decks/<deck-name>/`
 3. Create version folder: `v1/` (or next version if deck exists)
 4. Determine method: PptxGenJS (default) or template-based
-5. **If >5 slides: YOU MUST spawn `slide-builder` sub-agents** — split into groups of 2-4 slides, each agent gets content plan + style plan + theme JSON. Do NOT build all slides in one script.
-6. If <=5 slides: build directly in a single PptxGenJS script
+5. If >12 slides: spawn `slide-builder` sub-agents — split by sub-topic/section, each agent gets content plan + style plan + theme JSON for their section
+6. If <=12 slides: build in a single PptxGenJS script
 7. Output `.pptx` to the version folder
 
 ### QA Phase — MANDATORY

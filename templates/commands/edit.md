@@ -76,8 +76,8 @@ Same iteration flow as Create — increment drafts, never overwrite, approve whe
 
 1. **Unpack**: `python scripts/unpack.py <deck>.pptx unpacked/`
 2. **Edit**:
-   - If >3 slides changing: spawn `slide-editor` sub-agents with the relevant edit plan(s)
-   - If <=3 slides: edit directly using the Edit tool
+   - If >8 slides changing: spawn `slide-editor` sub-agents with the relevant edit plan(s)
+   - If <=8 slides: edit directly using the Edit tool
 3. **Clean + pack**:
    - `python scripts/clean.py unpacked/`
    - `python scripts/pack.py unpacked/ output.pptx --original <deck>.pptx`

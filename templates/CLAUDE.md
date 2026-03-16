@@ -160,12 +160,12 @@ Theme structure:
 ## Sub-Agents
 
 ### When to use
-- **Create (build phase)**: Decks with >5 slides — split into groups of 2-4 slides per `slide-builder` agent
+- **Create (build phase)**: Decks with >12 slides — split by sub-topic, each `slide-builder` agent owns a coherent section. For <=12 slides, build in a single script.
 - **Review (QA)**: Always spawn `qa-reviewer` agent (fresh eyes principle)
-- **Edit (apply phase)**: When editing >3 slides — spawn `slide-editor` agents for parallel XML editing
+- **Edit (apply phase)**: When editing >8 slides — spawn `slide-editor` agents for parallel XML editing. For <=8 slides, edit directly.
 
 ### How to divide work
-- Group slides by visual similarity when possible (all content slides together, data slides together)
+- Group slides by sub-topic or section (not arbitrarily) — each agent should own a coherent group
 - Each sub-agent gets: **content plan** (what to build) + **style plan** (how it looks) + API reference
 - If a plan was skipped, pass the defaults the agent is using instead
 - For PptxGenJS: each sub-agent writes a function that adds slides to a `pres` object
