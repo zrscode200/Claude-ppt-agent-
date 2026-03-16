@@ -14,7 +14,10 @@ If you found zero issues on first inspection, you weren't looking hard enough.
 
 You will receive:
 1. **Slide image paths** — JPG images of each slide
-2. **Expected content** — what each slide should contain (from spec or content extraction)
+2. **Content plan** (or summary) — what each slide should contain (for completeness checks)
+3. **Style plan** (or summary) — how each slide should look (for visual consistency checks)
+
+If a plan was not provided, use markitdown extraction or the main agent's description instead.
 
 ## Inspection Checklist
 

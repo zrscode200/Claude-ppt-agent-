@@ -15,23 +15,24 @@ Turn an existing document, meeting notes, outline, or brief into a presentation.
    - Structure and flow
    - Implied audience and tone
 
-2. **Propose a deck structure.** Present to the user:
-   - Suggested slide count
-   - Slide-by-slide outline with content mapping
-   - Which parts of the document map to which slides
-   - What to include vs. leave out (decks should be concise)
-   - Suggested theme
+2. **Content plan from the document.** Present a lightweight inline outline mapping source content to slides:
 
-3. **User confirms or adjusts** the proposed structure.
+   ```
+   Slides:
+     1. Title — from document title / intro
+     2. Problem Statement — from section 1 (summarized)
+     3. Key Findings — from section 2 (3 stat callouts)
+     4. Recommendations — from section 3 (distilled to 4 points)
+     5. Next Steps — from conclusion
+   ```
 
-4. **Write a spec.** Create `spec-draft-1.md` in `.ppt/decks/<deck-name>/`.
-   - Map source content to each slide
-   - Note which content needs summarizing vs. direct use
-   - Follow the standard spec format from CLAUDE.md
+   Note what to include vs. leave out — decks should be concise. Iterate with the user, then write `content-plan-draft-1.md`. Same iteration flow as `/create-deck` → `content-plan-approved.md`.
 
-5. **Follow the standard creation workflow:**
-   - User approves spec → build → QA → deliver
-   - Same as `/create-deck` from Phase 2 onward
+3. **Style plan.** Suggest visual direction based on the document's tone and audience. Present inline, iterate, then write `style-plan-draft-1.md` → `style-plan-approved.md`.
+
+   Style plan is optional here — if the user wants to focus on content mapping, agent uses sensible defaults.
+
+4. **Spec + Build + QA + Deliver** — same as `/create-deck` from Phase 3 onward.
 
 ## Supported Source Formats
 

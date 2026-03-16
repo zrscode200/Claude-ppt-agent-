@@ -39,11 +39,18 @@ Track the current deck and phase. Artifacts live in `.ppt/decks/<deck-name>/`.
 
 **Phase detection** (for resuming work):
 ```
-if v<n>/qa-review.md exists  → QA complete, ready for next edition or delivery
-elif v<n>/<deck>.pptx exists → Build complete, needs QA
-elif spec-approved.md exists → Spec approved, ready to build
-elif spec-draft-*.md exists  → Brainstorm in progress
-else                         → New deck, start from scratch
+if v<n>/qa-review.md exists           → QA complete, ready for next edition or delivery
+elif v<n>/<deck>.pptx exists          → Build complete, needs QA
+elif spec-approved.md exists          → Spec approved, ready to build
+elif content-plan-approved.md exists
+  and style-plan-approved.md exists   → Both plans approved, ready for spec
+elif content-plan-approved.md exists  → Content plan approved, style plan pending (or skipped)
+elif style-plan-approved.md exists    → Style plan approved, content plan pending (or skipped)
+elif content-plan-draft-*.md exists
+  or style-plan-draft-*.md exists     → Planning in progress
+elif edit-content-plan-draft-*.md exists
+  or edit-style-plan-draft-*.md exists → Edit planning in progress
+else                                  → New deck, start from scratch
 ```
 
 ### Deck Naming
@@ -64,12 +71,23 @@ Detect current version: find the highest `v<n>/` folder. New builds go to `v<n+1
 
 For the first build, use `v1/`.
 
-### Spec Lifecycle
+### Plan & Spec Lifecycle
 
-1. Write `spec-draft-1.md` during brainstorm
-2. If user requests changes, write `spec-draft-2.md` (never overwrite)
-3. When user approves, copy to `spec-approved.md`
-4. For improve-deck with spec-driven edits, write `edit-spec-draft-<n>.md`
+**Planning (order-independent, individually optional):**
+1. During conversation, detect whether user focuses on content or style
+2. Start with whichever plan the user gravitates toward
+3. Present lightweight inline outline → iterate → write `content-plan-draft-1.md` or `style-plan-draft-1.md`
+4. If user requests changes, write `*-draft-2.md` (never overwrite)
+5. When user approves a plan, copy to `*-approved.md`
+6. Repeat for the other plan, or skip if user wants to move forward
+
+**Spec:**
+7. When at least one plan is approved, write `spec-approved.md` (thin doc referencing plans + build details)
+
+**Edit plans (for `/improve-deck`):**
+- Content-only change → `edit-content-plan-draft-<n>.md` only
+- Style-only change → `edit-style-plan-draft-<n>.md` only
+- Both → both edit plans
 
 ## Sub-Agent Orchestration
 
@@ -79,10 +97,11 @@ For decks with >5 slides:
 
 1. **Divide slides** into groups of 2-4 by visual similarity
 2. **Spawn `slide-builder` agents** — each gets:
-   - The theme JSON (read from `themes/`)
-   - Their assigned slide specs (extracted from the spec)
+   - Their assigned slides from the **content plan** (what to build)
+   - The **style plan** or theme JSON (how it looks)
    - PptxGenJS API reference (`.claude/skills/ppt-studio/references/pptxgenjs-guide.md`)
    - Instruction: "Write a `buildSlides(pres, theme)` function"
+   - If a plan was skipped, pass the defaults being used instead
 3. **Assemble** — main agent creates wrapper script, inlines sub-agent functions, runs it
 4. **Output** goes to `.ppt/decks/<name>/v<n>/<name>.pptx`
 
@@ -95,7 +114,7 @@ For improving existing decks with >3 slides to edit:
 1. **Unpack** the `.pptx`: `python scripts/unpack.py <deck>.pptx unpacked/`
 2. **Spawn `slide-editor` agents** — each gets:
    - Assigned slide XML file paths
-   - Edit instructions (from edit spec or direct request)
+   - The relevant edit plan(s) — content changes, style changes, or both
    - XML formatting rules (from `references/editing-guide.md`)
 3. **Clean + pack** after all edits complete
 4. **Output** to next version folder
@@ -104,11 +123,13 @@ For improving existing decks with >3 slides to edit:
 
 Always use a sub-agent:
 
-1. **Convert** to images: `soffice` → PDF → `pdftoppm` → JPGs
+1. **Convert** to images: `python scripts/soffice.py <deck>.pptx --output-dir slides/`
 2. **Spawn `qa-reviewer` agent** with:
    - Slide image paths
-   - Expected content per slide (from spec or markitdown extraction)
+   - **Content plan** for completeness checks (expected content per slide)
+   - **Style plan** for visual consistency checks (theme, layouts, motif)
    - The QA checklist (overlaps, overflow, contrast, spacing, alignment)
+   - If a plan was skipped, use markitdown extraction or defaults instead
 3. **Fix** reported issues
 4. **Re-verify** affected slides (spawn another QA agent if needed)
 5. **Save** findings to `v<n>/qa-review.md`

@@ -5,9 +5,12 @@ You are a slide builder. Your job is to write PptxGenJS code that creates your a
 ## Input
 
 You will receive:
-1. **Theme** — a JSON object with colors, fonts, and chart_colors
-2. **Slide specs** — the specific slides you need to build (from the deck spec)
-3. **Slide index range** — which slide numbers you're building (e.g., slides 3-5)
+1. **Content plan** (or excerpt) — what goes on each of your assigned slides (messages, data, structure)
+2. **Style plan** (or excerpt) — how each slide looks (layouts, visual elements, motif)
+3. **Theme JSON** — colors, fonts, and chart_colors
+4. **Slide index range** — which slide numbers you're building (e.g., slides 3-5)
+
+If a plan was not provided, the main agent will pass defaults instead.
 
 ## Output
 

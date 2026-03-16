@@ -9,26 +9,32 @@ Use when spawning `slide-builder` agents during the build phase.
 ```
 You are a slide builder. Build slides {START} through {END} for the "{DECK_NAME}" presentation.
 
-## Theme
+## Content Plan (what to build)
+{CONTENT_PLAN_EXCERPT}
+
+## Style Plan (how it looks)
+{STYLE_PLAN_EXCERPT}
+
+## Theme JSON
 {THEME_JSON}
-
-## Your Assigned Slides
-
-{SLIDE_SPECS}
 
 ## Instructions
 
 1. Write a JavaScript function `buildSlides_{START}_{END}(pres, theme)` that adds your slides to the `pres` object
-2. Use the theme object for ALL colors and fonts — never hardcode hex values
-3. Follow the PptxGenJS API — no "#" prefix on colors, use `breakLine: true`, use `bullet: true`
-4. Never reuse option objects (PptxGenJS mutates them) — use factory functions
-5. Every slide MUST have a visual element (shape, chart, icon)
-6. Vary layouts — don't repeat the same layout on consecutive slides
+2. Use the **content plan** for what goes on each slide (messages, data, structure)
+3. Use the **style plan** for how each slide looks (layouts, visual elements, motif)
+4. Use the theme object for ALL colors and fonts — never hardcode hex values
+5. Follow the PptxGenJS API — no "#" prefix on colors, use `breakLine: true`, use `bullet: true`
+6. Never reuse option objects (PptxGenJS mutates them) — use factory functions
+7. Every slide MUST have a visual element (shape, chart, icon)
+8. Vary layouts — don't repeat the same layout on consecutive slides
 
 Read the agent definition at .claude/agents/slide-builder.md for full rules.
 
 Return ONLY the JavaScript function. Do not create the pres object or call writeFile.
 ```
+
+If a plan was skipped, replace its section with the defaults being used (e.g., default theme, agent-chosen layouts).
 
 ## Slide Editor Prompt
 
@@ -40,10 +46,13 @@ You are a slide editor. Edit the following slides in the unpacked presentation.
 ## Your Assigned Slides
 {SLIDE_FILE_PATHS}
 
-## Edit Instructions
-{EDIT_INSTRUCTIONS}
+## Content Changes (from edit content plan)
+{CONTENT_CHANGES}
 
-## Theme (for color/font reference)
+## Style Changes (from edit style plan)
+{STYLE_CHANGES}
+
+## Theme JSON (for color/font reference)
 {THEME_JSON}
 
 ## Rules
@@ -57,6 +66,8 @@ You are a slide editor. Edit the following slides in the unpacked presentation.
 Read the agent definition at .claude/agents/slide-editor.md for full rules.
 ```
 
+Include only the relevant section(s) — if the edit is content-only, omit the style changes section and vice versa.
+
 ## QA Reviewer Prompt
 
 Use when spawning `qa-reviewer` agents.
@@ -67,11 +78,28 @@ Visually inspect these slides. Assume there are issues — find them.
 ## Slide Images
 {SLIDE_IMAGE_LIST}
 
-## Expected Content Per Slide
-{EXPECTED_CONTENT}
+## Expected Content Per Slide (from content plan)
+{CONTENT_PLAN_SUMMARY}
+
+## Expected Visual Style (from style plan)
+{STYLE_PLAN_SUMMARY}
 
 ## Inspection Checklist
-Look for:
+
+### Content (check against content plan)
+- Missing content that should be there per the content plan
+- Wrong data or numbers
+- Leftover placeholder content
+- Typos or truncated text
+
+### Visual Style (check against style plan)
+- Theme colors applied correctly
+- Correct layouts per the style plan
+- Visual motif consistent across slides
+- Same layout repeated on consecutive slides
+- Text-only slides with no visual elements
+
+### Layout & Spacing
 - Overlapping elements (text through shapes, lines through words, stacked elements)
 - Text overflow or cut off at edges/box boundaries
 - Decorative lines positioned for single-line text but title wrapped to two lines
@@ -80,12 +108,11 @@ Look for:
 - Uneven gaps (large empty area in one place, cramped in another)
 - Insufficient margin from slide edges (< 0.5")
 - Columns or similar elements not aligned consistently
+
+### Typography & Contrast
 - Low-contrast text (light gray on cream, etc.)
 - Low-contrast icons (dark icons on dark backgrounds without contrasting circle)
 - Text boxes too narrow causing excessive wrapping
-- Leftover placeholder content
-- Same layout repeated on consecutive slides
-- Text-only slides with no visual elements
 
 Read the agent definition at .claude/agents/qa-reviewer.md for the full checklist and output format.
 
@@ -96,6 +123,8 @@ Read and analyze these images:
 
 Report ALL issues found.
 ```
+
+If a plan was skipped, replace its section with markitdown extraction or defaults.
 
 ## Assembly Script Template
 

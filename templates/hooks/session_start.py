@@ -24,13 +24,32 @@ def detect_phase(deck_dir: Path) -> str:
     if (deck_dir / "spec-approved.md").exists():
         return "Spec approved, ready to build"
 
-    drafts = sorted(deck_dir.glob("spec-draft-*.md"))
-    if drafts:
-        return f"Brainstorming ({drafts[-1].name})"
+    # Check plan status
+    content_approved = (deck_dir / "content-plan-approved.md").exists()
+    style_approved = (deck_dir / "style-plan-approved.md").exists()
+    content_drafts = sorted(deck_dir.glob("content-plan-draft-*.md"))
+    style_drafts = sorted(deck_dir.glob("style-plan-draft-*.md"))
 
-    edit_drafts = sorted(deck_dir.glob("edit-spec-draft-*.md"))
-    if edit_drafts:
-        return f"Edit spec in progress ({edit_drafts[-1].name})"
+    if content_approved and style_approved:
+        return "Both plans approved, ready for spec"
+    elif content_approved and style_drafts:
+        return f"Content plan approved, style planning ({style_drafts[-1].name})"
+    elif style_approved and content_drafts:
+        return f"Style plan approved, content planning ({content_drafts[-1].name})"
+    elif content_approved:
+        return "Content plan approved, style plan pending"
+    elif style_approved:
+        return "Style plan approved, content plan pending"
+    elif content_drafts or style_drafts:
+        latest_draft = (content_drafts + style_drafts)[-1]
+        return f"Planning ({latest_draft.name})"
+
+    # Check edit plans
+    edit_content_drafts = sorted(deck_dir.glob("edit-content-plan-draft-*.md"))
+    edit_style_drafts = sorted(deck_dir.glob("edit-style-plan-draft-*.md"))
+    if edit_content_drafts or edit_style_drafts:
+        latest_edit = (edit_content_drafts + edit_style_drafts)[-1]
+        return f"Edit planning ({latest_edit.name})"
 
     return "New deck (no artifacts)"
 

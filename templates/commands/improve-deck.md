@@ -20,7 +20,7 @@ For small, targeted changes: "fix the spacing on slide 3", "change the title fon
 3. Save as next version
 4. Run QA on affected slides
 
-### Spec-Driven Edit Mode
+### Plan-Driven Edit Mode
 
 For broader changes: "redesign the data section", "make it more visual", "restructure the flow".
 
@@ -29,32 +29,52 @@ For broader changes: "redesign the data section", "make it more visual", "restru
    - `python -m markitdown <deck>.pptx` for content extraction
    - Present findings to user
 
-2. **Write an edit spec** at `.ppt/decks/<deck-name>/edit-spec-draft-<n>.md`:
+2. **Create only the relevant plan(s).** Detect what kind of change is needed:
+
+   **Content-only change** ("add a Q4 section", "restructure the flow"):
+   Write `edit-content-plan-draft-<n>.md`:
    ```markdown
-   # Edit Spec: [Deck Name]
+   # Edit Content Plan: [Deck Name]
 
    ## Source
-   - **File**: path/to/original.pptx
    - **Base Version**: v<n>
 
-   ## Changes
+   ## Content Changes
 
    ### Slide 3: Revenue Overview
-   - **Current**: Plain bullet list
-   - **Change**: Replace with 3 stat callouts + bar chart
-   - **Layout**: Two-column (stats left, chart right)
+   - **Current**: Plain bullet list with Q1-Q3
+   - **Change**: Add Q4 data, replace with 4 stat callouts
 
-   ### Slide 5: Team
-   - **Current**: 4-person grid
-   - **Change**: Update to 3 people, remove person 4 entirely
-   ...
+   ### New Slide 6: Q4 Deep Dive
+   - **Content**: Q4 breakdown by region
    ```
 
-3. **User approves** the edit spec
+   **Style-only change** ("make it more modern", "switch to dark theme"):
+   Write `edit-style-plan-draft-<n>.md`:
+   ```markdown
+   # Edit Style Plan: [Deck Name]
+
+   ## Source
+   - **Base Version**: v<n>
+
+   ## Style Changes
+
+   ### Global
+   - **Theme**: Switch from warm-terracotta to midnight-executive
+   - **Motif**: Replace accent bars with gradient overlays
+
+   ### Slide 3: Revenue Overview
+   - **Layout**: Change from bullet list to two-column (stats left, chart right)
+   ```
+
+   **Both** ("redesign the data section with new charts"):
+   Write both edit plans.
+
+3. **Iterate with user** — same inline back-and-forth as `/create-deck` planning. Approve relevant plan(s).
 
 4. **Apply changes:**
    - Unpack with `unpack.py`
-   - If >3 slides changing: spawn `slide-editor` sub-agents
+   - If >3 slides changing: spawn `slide-editor` sub-agents with the relevant plan(s)
    - If ≤3 slides: edit directly
    - Clean + pack
 

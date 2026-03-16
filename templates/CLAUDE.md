@@ -36,22 +36,32 @@ The primary workflow. Use when the user wants a new presentation.
 
 **Phases:**
 
-1. **Brainstorm** (adaptive) — Start freeform, probe naturally, then run a checklist to fill gaps. Produce `spec-draft-<n>.md`. User approves before building.
-2. **Build** — Select theme, spawn sub-agents for parallel slide construction (if >5 slides). Assemble the deck.
-3. **QA** — Convert to images, spawn QA sub-agent with fresh eyes. Fix issues. Produce `qa-review-<n>.md`.
-4. **Deliver** — Final `.pptx` in the deck's version folder.
+1. **Conversation** — Start freeform, probe naturally for purpose, audience, content, visual direction.
+2. **Planning** — Collaboratively build two separate plans with the user:
+   - **Content plan** — what goes on each slide (messages, data, flow, structure)
+   - **Style plan** — how it looks (theme, layouts, motif, fonts, color application)
+   Plans are **order-independent** — start with whichever the user gravitates toward. Both are encouraged but individually optional (at least one required). If one is skipped, the agent fills in sensible defaults during build.
+3. **Spec** — Write a thin build-ready spec that references both plans and adds method/output details. User approves before building.
+4. **Build** — Spawn sub-agents for parallel slide construction (if >5 slides). Assemble the deck.
+5. **QA** — Convert to images, spawn QA sub-agent with fresh eyes. Fix issues. Produce `qa-review.md`.
+6. **Deliver** — Final `.pptx` in the deck's version folder.
 
 ### Quick Creation (`/quick-deck`)
 
-Skip the spec. User describes what they want, you build it directly with sensible defaults. Still runs QA.
+Skip planning and spec. User describes what they want, you build it directly with sensible defaults. Still runs QA.
 
 ### Improve Existing (`/improve-deck`)
 
 Two modes:
 - **Direct edit**: "Fix the spacing on slide 3" → just do it
-- **Spec-driven edit**: "Redesign the data section" → write an edit spec → approve → apply
+- **Plan-driven edit**: "Redesign the data section" → create the relevant plan(s) → approve → apply
 
-Detect which mode based on scope. Small targeted changes = direct. Broader changes = spec-driven.
+Detect which mode based on scope. Small targeted changes = direct. Broader changes = plan-driven.
+
+For plan-driven edits, only create the plan(s) relevant to the change:
+- Content-only change ("add a Q4 section") → `edit-content-plan` only
+- Style-only change ("make it more modern") → `edit-style-plan` only
+- Both ("redesign the data section with new charts") → both plans
 
 ### Review Only (`/review-deck`)
 
@@ -63,7 +73,7 @@ Convert slides to images and run visual inspection. Report issues.
 
 ### Content Import (`/deck-from-doc`)
 
-Turn documents, notes, or outlines into a presentation. Parses input → generates spec → follows creation workflow.
+Turn documents, notes, or outlines into a presentation. Parses input → follows the planning workflow (content plan from the source document, then style plan).
 
 ## Workspace Structure
 
@@ -72,9 +82,12 @@ Turn documents, notes, or outlines into a presentation. Parses input → generat
   config.md                          # Autonomy mode, default theme
   decks/
     <deck-name>/
-      spec-draft-1.md                # Brainstorm iteration 1
-      spec-draft-2.md                # Iteration 2 (never overwrite, increment)
-      spec-approved.md               # Snapshot when user approves
+      content-plan-draft-1.md        # Content plan iteration 1
+      content-plan-draft-2.md        # Iteration 2 (never overwrite, increment)
+      content-plan-approved.md       # Approved content plan
+      style-plan-draft-1.md          # Style plan iteration 1
+      style-plan-approved.md         # Approved style plan
+      spec-approved.md               # Build-ready spec (references both plans)
       v1/                            # Edition 1
         <deck-name>.pptx             # The presentation
         slides/                      # Slide images for QA
@@ -89,11 +102,19 @@ Turn documents, notes, or outlines into a presentation. Parses input → generat
       v3/                            # ...and so on
 ```
 
+For plan-driven edits, edit plans live alongside the originals:
+```
+      edit-content-plan-draft-1.md   # Content changes for this edit
+      edit-style-plan-draft-1.md     # Style changes for this edit
+```
+
 **Rules:**
-- Never overwrite spec drafts — increment the number
+- Never overwrite plan drafts — increment the number
+- Plans are order-independent — start with whichever the user focuses on
+- Both plans are encouraged but individually optional (at least one required)
 - Each build/edit cycle produces a new version folder (`v1/`, `v2/`, ...)
 - The changelog in each version (after v1) records what changed
-- Specs live at deck level (shared across versions)
+- Plans and specs live at deck level (shared across versions)
 - Slide images are generated for every version (for QA)
 
 ## Themes
@@ -137,7 +158,8 @@ Theme structure:
 
 ### How to divide work
 - Group slides by visual similarity when possible (all content slides together, data slides together)
-- Each sub-agent gets: theme JSON + assigned slide specs + API reference
+- Each sub-agent gets: **content plan** (what to build) + **style plan** (how it looks) + API reference
+- If a plan was skipped, pass the defaults the agent is using instead
 - For PptxGenJS: each sub-agent writes a function that adds slides to a `pres` object
 - For XML editing: each sub-agent edits its assigned slide files directly
 
@@ -147,19 +169,37 @@ Theme structure:
 3. Main agent assembles into one script, runs it
 4. Output goes to the deck's version folder
 
-## Spec Format
+## Plan Formats
+
+### Content Plan
 
 ```markdown
-# Deck: [Title]
+# Content Plan: [Deck Title]
 
-## Meta
+## Overview
 | Field | Value |
 |-------|-------|
 | Purpose | ... |
 | Audience | ... |
 | Tone | formal / casual / technical / creative |
-| Slides | N |
-| Method | pptxgenjs / template:<name> |
+| Slide Count | N |
+
+## Slide Outline
+
+### 1. [Slide Title]
+- **Type**: title / content / data / conclusion
+- **Key Message**: [the one thing the audience should take away]
+- **Content**: [text, bullet points, talking points]
+- **Data/Visuals Needed**: [charts, stats, images — what, not how]
+
+### 2. [Slide Title]
+...
+```
+
+### Style Plan
+
+```markdown
+# Style Plan: [Deck Title]
 
 ## Theme
 | Element | Value |
@@ -168,21 +208,44 @@ Theme structure:
 | Primary | `hex` |
 | Secondary | `hex` |
 | Accent | `hex` |
-| Background | dark-sandwich / all-dark / all-light |
+| Background Strategy | dark-sandwich / all-dark / all-light |
 | Header Font | ... |
 | Body Font | ... |
-| Visual Motif | ... |
 
-## Slides
+## Visual Direction
+- **Motif**: [one distinctive element carried across every slide]
+- **Color Application**: [how colors map to elements — dark titles, light content, accent for callouts, etc.]
+
+## Per-Slide Layouts
 
 ### 1. [Slide Title]
-- **Layout**: [layout type]
-- **Content**: [what goes on this slide]
-- **Visual Elements**: [shapes, charts, icons, images]
+- **Layout**: [full-bleed dark / two-column / stat callouts / icon rows / grid / etc.]
+- **Visual Elements**: [shapes, charts, icons, images — how the content is presented]
 
 ### 2. [Slide Title]
 ...
 ```
+
+### Spec (Build-Ready)
+
+The spec is a thin document that references both plans and adds build details:
+
+```markdown
+# Spec: [Deck Title]
+
+## Plans
+- Content Plan: `content-plan-approved.md`
+- Style Plan: `style-plan-approved.md`
+
+## Build
+| Field | Value |
+|-------|-------|
+| Method | pptxgenjs / template:<name> |
+| Layout | LAYOUT_16x9 |
+| Slides | N |
+```
+
+If a plan was skipped, the spec notes the defaults the agent will use.
 
 ## Design Principles
 
@@ -220,7 +283,10 @@ Configured in `.ppt/config.md`:
 ## Conventions
 
 - Deck folders use `lowercase-kebab-case`
-- Specs are markdown, never overwritten (increment draft numbers)
+- Plans and specs are markdown, never overwritten (increment draft numbers)
+- Content plans: `content-plan-draft-<n>.md` → `content-plan-approved.md`
+- Style plans: `style-plan-draft-<n>.md` → `style-plan-approved.md`
+- Edit plans: `edit-content-plan-draft-<n>.md`, `edit-style-plan-draft-<n>.md`
 - Each edition is a new version folder (`v1/`, `v2/`, ...)
 - Slide images go in `<version>/slides/`
 - QA reviews go in `<version>/qa-review.md`
