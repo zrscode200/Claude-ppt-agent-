@@ -81,7 +81,7 @@ For decks with >5 slides:
 2. **Spawn `slide-builder` agents** — each gets:
    - The theme JSON (read from `themes/`)
    - Their assigned slide specs (extracted from the spec)
-   - PptxGenJS API reference (point to plugin's `pptxgenjs.md`)
+   - PptxGenJS API reference (`.claude/skills/ppt-studio/references/pptxgenjs-guide.md`)
    - Instruction: "Write a `buildSlides(pres, theme)` function"
 3. **Assemble** — main agent creates wrapper script, inlines sub-agent functions, runs it
 4. **Output** goes to `.ppt/decks/<name>/v<n>/<name>.pptx`
@@ -92,11 +92,11 @@ For decks with ≤5 slides: build directly, no sub-agents.
 
 For improving existing decks with >3 slides to edit:
 
-1. **Unpack** the `.pptx` using plugin's `unpack.py`
+1. **Unpack** the `.pptx`: `python scripts/unpack.py <deck>.pptx unpacked/`
 2. **Spawn `slide-editor` agents** — each gets:
    - Assigned slide XML file paths
    - Edit instructions (from edit spec or direct request)
-   - XML formatting rules (from plugin's `editing.md`)
+   - XML formatting rules (from `references/editing-guide.md`)
 3. **Clean + pack** after all edits complete
 4. **Output** to next version folder
 
@@ -116,6 +116,6 @@ Always use a sub-agent:
 ## References
 
 - Design guide: `.claude/skills/ppt-studio/references/design-guide.md`
+- PptxGenJS API: `.claude/skills/ppt-studio/references/pptxgenjs-guide.md`
+- Editing guide: `.claude/skills/ppt-studio/references/editing-guide.md`
 - Sub-agent prompts: `.claude/skills/ppt-studio/references/subagent-prompts.md`
-- Plugin PptxGenJS docs: invoke `/pptx` skill to load
-- Plugin editing docs: invoke `/pptx` skill to load

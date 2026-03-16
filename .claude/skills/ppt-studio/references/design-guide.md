@@ -1,6 +1,6 @@
 # Design Guide
 
-Comprehensive design reference for building presentations. This supplements the design ideas in the `document-skills:pptx` plugin.
+Comprehensive design reference for building presentations.
 
 ## Color Palettes
 

@@ -207,6 +207,7 @@ marimo/_lsp/
 __marimo__/
 
 # PPT Studio
+.venv/
 node_modules/
 output/
 .ppt/logs/

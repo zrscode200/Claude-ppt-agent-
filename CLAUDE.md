@@ -4,14 +4,29 @@ You are a **presentation design specialist**. This repo is your studio. When wor
 
 ## Foundation
 
-The `document-skills:pptx` plugin is your engine. It provides:
-- **PptxGenJS** for creating decks from scratch (see the plugin's `pptxgenjs.md`)
-- **Unpack/edit/pack** workflow for editing existing `.pptx` files (see the plugin's `editing.md`)
-- **Utility scripts**: `thumbnail.py`, `unpack.py`, `pack.py`, `clean.py`, `add_slide.py`
-- **Conversion**: `soffice` → PDF, `pdftoppm` → slide images
-- **Text extraction**: `python -m markitdown`
+This repo is fully standalone. All tools are included:
 
-Always invoke `/pptx` (the plugin skill) when you need its scripts or detailed API reference. The skill loaded here builds the workflow layer on top.
+### Creation
+- **PptxGenJS** for creating decks from scratch (see `.claude/skills/ppt-studio/references/pptxgenjs-guide.md`)
+- **python-pptx** for programmatic reading/editing of `.pptx` files
+
+### Editing
+- **Unpack/edit/pack** workflow for XML-level editing (see `.claude/skills/ppt-studio/references/editing-guide.md`)
+
+### Scripts (in `scripts/`)
+| Script | Usage |
+|--------|-------|
+| `unpack.py` | `python scripts/unpack.py input.pptx unpacked/` — extract and pretty-print XML |
+| `pack.py` | `python scripts/pack.py unpacked/ output.pptx --original input.pptx` — repack with validation |
+| `clean.py` | `python scripts/clean.py unpacked/` — remove orphaned slides/media |
+| `add_slide.py` | `python scripts/add_slide.py unpacked/ slide2.xml` — duplicate a slide |
+| `thumbnail.py` | `python scripts/thumbnail.py input.pptx` — create visual grid of slides |
+| `soffice.py` | `python scripts/soffice.py input.pptx --output-dir slides/` — high-fidelity slide images |
+
+### Text Extraction
+- `python -m markitdown input.pptx` — extract text content from slides
+
+All scripts use the project venv: `source .venv/bin/activate`
 
 ## Workflows
 
@@ -216,7 +231,13 @@ Configured in `.ppt/config.md`:
 
 ## Dependencies
 
-Before building, ensure these are installed:
-- **npm**: `pptxgenjs`, `react-icons`, `react`, `react-dom`, `sharp`
-- **pip**: `markitdown[pptx]`, `Pillow`, `defusedxml`
-- **system**: `soffice` (LibreOffice), `pdftoppm` (Poppler)
+### Required
+- **Python venv**: `source .venv/bin/activate` (Python 3.12+)
+- **pip** (in venv): `markitdown[pptx]`, `Pillow`, `defusedxml` (also installs `python-pptx`)
+- **npm** (project-local): `pptxgenjs`, `react-icons`, `react`, `react-dom`, `sharp`
+
+### Optional (for high-fidelity rendering)
+- **LibreOffice**: `brew install --cask libreoffice` — for PDF/image conversion
+- **Poppler**: `brew install poppler` — for `pdftoppm` (PDF → slide images)
+
+Without LibreOffice/Poppler, `thumbnail.py` falls back to a python-pptx renderer (lower fidelity but functional).
