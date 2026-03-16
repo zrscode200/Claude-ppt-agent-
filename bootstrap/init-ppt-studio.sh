@@ -377,12 +377,12 @@ else
   echo "  1. cd $TARGET"
   echo "  2. Open Claude Code in this directory"
   echo "  3. Try these commands:"
-  echo "     /create-deck    — spec-driven presentation creation"
-  echo "     /quick-deck     — fast no-spec creation"
-  echo "     /improve-deck   — edit an existing presentation"
-  echo "     /review-deck    — review without changes"
-  echo "     /qa-slides      — visual quality check"
+  echo "     /create-deck    — brainstorm + plan-driven creation"
+  echo "     /improve-deck   — review + edit an existing deck"
   echo "     /deck-from-doc  — turn a document into slides"
+  echo "     /review          — analyze a deck or document"
+  echo "     /create          — build slides (plan or direct mode)"
+  echo "     /edit            — modify existing slides"
 fi
 
 if ! $soffice_found; then
