@@ -35,8 +35,8 @@ Default to **full** if ambiguous.
 
 1. **Extract content**: `python -m markitdown <deck>.pptx`
 2. **Generate visuals** (if scope includes style):
-   - `python scripts/soffice.py <deck>.pptx --output-dir <slides-dir>/`
-   - Or `python scripts/thumbnail.py <deck>.pptx` for a quick overview
+   - `python scripts/thumbnail.py <deck>.pptx <slides-dir>/thumbnails --slides-dir <slides-dir>/`
+   - This produces individual slide images + a grid thumbnail. Works with or without LibreOffice.
 3. **Analyze**:
    - Content scope: assess messages, data accuracy, completeness, flow, conciseness
    - Style scope: spawn `qa-reviewer` sub-agent with slide images and the inspection checklist

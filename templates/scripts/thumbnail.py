@@ -327,6 +327,7 @@ def main():
     parser.add_argument("input", help="Input .pptx file")
     parser.add_argument("output_prefix", nargs="?", default="thumbnails", help="Output prefix (default: thumbnails)")
     parser.add_argument("--cols", type=int, default=DEFAULT_COLS, help=f"Columns (default: {DEFAULT_COLS}, max: {MAX_COLS})")
+    parser.add_argument("--slides-dir", default=None, help="Save individual slide images to this directory")
     args = parser.parse_args()
 
     cols = min(args.cols, MAX_COLS)
@@ -347,6 +348,15 @@ def main():
         if not images:
             print("Error: No slide images generated", file=sys.stderr)
             sys.exit(1)
+
+        # Save individual slide images if requested
+        if args.slides_dir:
+            slides_dir = Path(args.slides_dir)
+            slides_dir.mkdir(parents=True, exist_ok=True)
+            for i, img_path in enumerate(images, 1):
+                dst = slides_dir / f"slide-{i:02d}.jpg"
+                shutil.copy2(img_path, dst)
+                print(f"Slide: {dst}")
 
         # Pair images with slide names
         slides = list(zip(images, [s["name"] for s in slide_info[:len(images)]]))

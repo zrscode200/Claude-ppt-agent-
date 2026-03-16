@@ -64,21 +64,25 @@ Same iteration flow → `style-plan-approved.md`.
 2. Create deck folder: `.ppt/decks/<deck-name>/`
 3. Create version folder: `v1/` (or next version if deck exists)
 4. Determine method: PptxGenJS (default) or template-based
-5. If >5 slides: spawn `slide-builder` sub-agents with content plan + style plan
+5. **If >5 slides: YOU MUST spawn `slide-builder` sub-agents** — split into groups of 2-4 slides, each agent gets content plan + style plan + theme JSON. Do NOT build all slides in one script.
 6. If <=5 slides: build directly in a single PptxGenJS script
 7. Output `.pptx` to the version folder
 
-### QA Phase
+### QA Phase — MANDATORY
 
-Run a Review (style scope) on the built deck:
+**DO NOT skip QA. DO NOT go directly from build to delivery.**
 
-1. Convert to images: `python scripts/soffice.py <deck>.pptx --output-dir v<n>/slides/`
+1. Generate slide images:
+   ```
+   python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/
+   ```
+   This produces individual slide images (`slide-01.jpg`, `slide-02.jpg`, ...) for QA inspection, plus a grid thumbnail. Works with or without LibreOffice.
 2. Spawn `qa-reviewer` sub-agent with:
-   - Slide images
+   - Individual slide images from `v<n>/slides/`
    - Content plan for completeness checks (plan mode), or markitdown extraction (direct mode)
    - Style plan for visual consistency checks (plan mode), or visual inspection only (direct mode)
 3. Fix reported issues
-4. Re-verify affected slides
+4. Re-generate images for affected slides and re-verify — at least one fix-and-verify cycle
 5. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ### Delivery

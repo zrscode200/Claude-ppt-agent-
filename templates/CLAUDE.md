@@ -52,7 +52,7 @@ This repo is fully standalone. All tools are included:
 | `pack.py` | `python scripts/pack.py unpacked/ output.pptx --original input.pptx` — repack with validation |
 | `clean.py` | `python scripts/clean.py unpacked/` — remove orphaned slides/media |
 | `add_slide.py` | `python scripts/add_slide.py unpacked/ slide2.xml` — duplicate a slide |
-| `thumbnail.py` | `python scripts/thumbnail.py input.pptx` — create visual grid of slides |
+| `thumbnail.py` | `python scripts/thumbnail.py input.pptx [prefix] --slides-dir DIR` — create visual grid + individual slide images |
 | `soffice.py` | `python scripts/soffice.py input.pptx --output-dir slides/` — high-fidelity slide images |
 
 ### Text Extraction
@@ -252,10 +252,10 @@ See `.claude/skills/ppt-studio/references/design-guide.md` for full design refer
 - **No text-only slides** — every slide must have a visual element
 - **No default blue** — pick colors that reflect the topic
 - **No repeated layouts** — vary across slides
-- **Visual QA is mandatory** — never deliver without running Review (style scope)
-- **QA uses sub-agents** — fresh eyes catch what you miss
+- **Visual QA is mandatory** — NEVER go directly from build to delivery. Always run QA between build and delivery.
+- **QA uses sub-agents** — fresh eyes catch what you miss. Always spawn `qa-reviewer`.
 - **Fix-and-verify loop** — one fix often creates another problem; re-verify affected slides
-- **At least one fix-and-verify cycle** before declaring success
+- **At least one fix-and-verify cycle** before declaring success — zero-issue first pass means you weren't looking hard enough
 
 ## Autonomy Modes
 

@@ -87,11 +87,14 @@ Same iteration flow as Create — increment drafts, never overwrite, approve whe
 
 Run a Review (style scope) on changed slides:
 
-1. Convert to images
+1. Generate slide images:
+   ```
+   python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/
+   ```
 2. Spawn `qa-reviewer` sub-agent with:
-   - Slide images
+   - Individual slide images from `v<n>/slides/`
    - Edit plan(s) for reference (what was intended)
-3. Fix issues, re-verify
+3. Fix issues, re-verify — at least one fix-and-verify cycle
 4. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ### Changelog
