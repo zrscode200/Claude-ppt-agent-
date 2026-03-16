@@ -1,22 +1,30 @@
 ---
-description: Create a presentation from a document, outline, or notes
+description: Turn a document, outline, or notes into a presentation
 argument-hint: <path to source document>
 ---
 
 # Deck From Doc
 
-Turn an existing document, meeting notes, outline, or brief into a presentation.
+Composed workflow: **Review (source document) → Create**
+
+Parse a source document, then build a presentation from it. Combines the `/review` and `/create` fundamentals.
 
 ## Workflow
 
-1. **Read the source document.** Extract:
-   - Key topics and sections
-   - Data points, stats, quotes
-   - Structure and flow
-   - Implied audience and tone
+### Step 1: Review the Source Document
 
-2. **Content plan from the document.** Present a lightweight inline outline mapping source content to slides:
+Run `/review` on the source document:
 
+1. **Extract content**: read directly (markdown/text) or `python -m markitdown` (docx/pdf)
+2. **Analyze**: key topics, sections, data points, stats, quotes, structure, implied audience/tone
+3. **Assess** what translates to slides vs. what should be left out
+4. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
+
+### Step 2: Create from Review
+
+Run `/create` in plan mode, seeded with the review findings:
+
+1. **Content plan** — map source content to slides. Present inline:
    ```
    Slides:
      1. Title — from document title / intro
@@ -25,14 +33,11 @@ Turn an existing document, meeting notes, outline, or brief into a presentation.
      4. Recommendations — from section 3 (distilled to 4 points)
      5. Next Steps — from conclusion
    ```
+   Note what's included vs. left out. Iterate with user. The review report informs these decisions.
 
-   Note what to include vs. leave out — decks should be concise. Iterate with the user, then write `content-plan-draft-1.md`. Same iteration flow as `/create-deck` → `content-plan-approved.md`.
+2. **Style plan** — suggest visual direction based on the document's tone and audience. Optional — if the user wants to focus on content mapping, use sensible defaults.
 
-3. **Style plan.** Suggest visual direction based on the document's tone and audience. Present inline, iterate, then write `style-plan-draft-1.md` → `style-plan-approved.md`.
-
-   Style plan is optional here — if the user wants to focus on content mapping, agent uses sensible defaults.
-
-4. **Spec + Build + QA + Deliver** — same as `/create-deck` from Phase 3 onward.
+3. **Build → QA → Deliver** — same as `/create` from the build phase onward.
 
 ## Supported Source Formats
 
@@ -40,7 +45,8 @@ Turn an existing document, meeting notes, outline, or brief into a presentation.
 - Text files (`.txt`)
 - Word documents (`.docx`) — use `python -m markitdown` to extract
 - PDF files (`.pdf`) — use `python -m markitdown` to extract
-- Or just pasted text in the conversation
+- Existing `.pptx` files — recycle content or style from another deck
+- Pasted text in conversation
 
 ## Key Principle
 
@@ -48,3 +54,10 @@ Turn an existing document, meeting notes, outline, or brief into a presentation.
 - Has 1 key message per slide
 - Uses visuals to support the message
 - Leaves detail for speaker notes or handouts
+
+## What this adds over `/create` alone
+
+- The Review step parses and analyzes the source document first
+- Content plan is seeded from the review findings (not from scratch)
+- Handles various input formats (docx, pdf, markdown, pptx, text)
+- Natural entry point for "turn this into slides" intent
