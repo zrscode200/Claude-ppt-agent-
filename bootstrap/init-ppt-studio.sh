@@ -143,9 +143,11 @@ copy_and_overwrite() {
     echo "  skip (unchanged): $dst"
     return
   fi
+  local existed=false
+  [ -e "$dst" ] && existed=true
   mkdir -p "$(dirname "$dst")"
   cp "$src" "$dst"
-  if [ -e "$dst" ]; then
+  if $existed; then
     echo "  update: $dst"
   else
     echo "  create: $dst"

@@ -2,6 +2,7 @@
 """Session start hook — detects active decks and their current phase."""
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -35,7 +36,7 @@ def detect_phase(deck_dir: Path) -> str:
 
 
 def main():
-    project_dir = Path.cwd()
+    project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", Path.cwd()))
     decks_dir = project_dir / ".ppt" / "decks"
     context_parts = []
 

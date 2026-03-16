@@ -2,12 +2,13 @@
 """Setup hook — loads PPT Studio config and injects context at session init."""
 
 import json
+import os
 import sys
 from pathlib import Path
 
 
 def main():
-    project_dir = Path.cwd()
+    project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", Path.cwd()))
     config_path = project_dir / ".ppt" / "config.md"
     context_parts = []
 

@@ -11,8 +11,7 @@ Visual quality assurance on a presentation. Convert to images and inspect for is
 
 1. **Convert to images:**
    ```bash
-   python scripts/office/soffice.py --headless --convert-to pdf <deck>.pptx
-   pdftoppm -jpeg -r 150 <deck>.pdf slide
+   python scripts/soffice.py <deck>.pptx --output-dir <slides-dir>/
    ```
 
 2. **Spawn `qa-reviewer` sub-agent** with the slide images and this checklist:

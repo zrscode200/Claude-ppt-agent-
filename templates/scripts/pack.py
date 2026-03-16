@@ -18,12 +18,6 @@ from pathlib import Path
 from xml.dom import minidom
 
 
-SMART_QUOTES = {
-    '"': "\u201c",  # ASCII double quote context-dependent replacement
-    "'": "\u2019",  # ASCII single quote → right single quote (most common)
-}
-
-
 def condense_xml(text: str) -> bytes:
     """Remove pretty-printing whitespace from XML for compact output."""
     try:
@@ -33,16 +27,6 @@ def condense_xml(text: str) -> bytes:
         return output
     except Exception:
         return text.encode("utf-8")
-
-
-def restore_smart_quotes(text: str) -> str:
-    """Restore smart quotes that were normalized during unpack.
-
-    This only handles XML entity forms — actual quote characters in
-    text content are left as-is since context-dependent replacement
-    is unreliable.
-    """
-    return text
 
 
 def pack(input_dir: Path, output_path: Path, original_path: Path | None = None) -> None:
@@ -76,7 +60,6 @@ def pack(input_dir: Path, output_path: Path, original_path: Path | None = None) 
 
             if file_path.suffix in (".xml", ".rels"):
                 text = file_path.read_text(encoding="utf-8")
-                text = restore_smart_quotes(text)
                 content = condense_xml(text)
                 zf.writestr(arcname, content)
             elif arcname in original_binaries:
