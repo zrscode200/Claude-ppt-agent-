@@ -13,6 +13,7 @@ Optional: LibreOffice (soffice) + pdftoppm (poppler) for higher-fidelity renderi
 
 import argparse
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -35,14 +36,27 @@ LABEL_PADDING_RATIO = 0.4
 
 
 def get_soffice_path() -> str:
-    """Find soffice binary."""
-    # Common paths on macOS
-    mac_paths = [
-        "/Applications/LibreOffice.app/Contents/MacOS/soffice",
-        os.path.expanduser("~/Applications/LibreOffice.app/Contents/MacOS/soffice"),
-    ]
-    for p in mac_paths:
-        if os.path.exists(p):
+    """Find soffice binary for the current platform."""
+    system = platform.system()
+
+    if system == "Darwin":
+        candidates = [
+            "/Applications/LibreOffice.app/Contents/MacOS/soffice",
+            os.path.expanduser("~/Applications/LibreOffice.app/Contents/MacOS/soffice"),
+        ]
+    elif system == "Windows":
+        candidates = [
+            r"C:\Program Files\LibreOffice\program\soffice.exe",
+            r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
+        ]
+    else:  # Linux / WSL
+        candidates = [
+            "/usr/bin/soffice",
+            "/usr/lib/libreoffice/program/soffice",
+        ]
+
+    for p in candidates:
+        if os.path.isfile(p):
             return p
 
     # Fallback to PATH

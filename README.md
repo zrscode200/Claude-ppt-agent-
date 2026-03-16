@@ -5,7 +5,7 @@ A bootstrap toolkit that turns any directory into a Claude Code-powered presenta
 ## Quick Start
 
 ```bash
-./bootstrap/init-ppt-studio.sh /path/to/your/project
+python bootstrap/init-ppt-studio.py /path/to/your/project
 ```
 
 Then open Claude Code in the target directory and use:
@@ -47,19 +47,28 @@ The bootstrap script stamps the target directory with:
 To refresh system files without touching your work:
 
 ```bash
-./bootstrap/init-ppt-studio.sh /path/to/your/project --update
+python bootstrap/init-ppt-studio.py /path/to/your/project --update
 ```
 
 This updates scripts, commands, skills, agents, hooks, and themes. Your plans, decks, config, and custom templates are preserved.
 
 ## Requirements
 
+### Required
+
 - **Python 3.12+**
 - **Node.js / npm**
-- **LibreOffice** (optional) — `brew install --cask libreoffice` — for high-fidelity slide rendering
-- **Poppler** (optional) — `brew install poppler` — for PDF-to-image conversion
+
+### Optional (for high-fidelity slide rendering)
+
+| Tool | macOS | Linux / WSL | Windows |
+|------|-------|-------------|---------|
+| **LibreOffice** | `brew install --cask libreoffice` | `sudo apt install libreoffice` | `choco install libreoffice-fresh` or [libreoffice.org](https://www.libreoffice.org/) |
+| **Poppler** | `brew install poppler` | `sudo apt install poppler-utils` | `choco install poppler` or [GitHub release](https://github.com/oschwartz10612/poppler-windows) |
 
 Without LibreOffice/Poppler, thumbnail generation falls back to a basic python-pptx renderer.
+
+The bootstrap script auto-detects your platform and shows the right install commands.
 
 ## Target Repo Structure
 
