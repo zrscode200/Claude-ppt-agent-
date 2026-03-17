@@ -34,14 +34,23 @@ Default to **full** if ambiguous.
 ### For `.pptx` input
 
 1. **Extract content**: `python -m markitdown <deck>.pptx`
-2. **Generate visuals** (if scope includes style):
+2. **Inspect visual structure** (if scope includes style):
+   - `python scripts/unpack.py <deck>.pptx unpacked/`
+   - Read `unpacked/ppt/theme/theme1.xml` → color scheme, font scheme
+   - Sample 3-5 slide XMLs → identify shapes (`<p:sp>`), connectors (`<p:cxnSp>`), groups (`<p:grpSp>`), images (`<p:pic>`), fills (`<a:solidFill>`), tables, charts
+   - This is how you determine what visual elements the deck contains
+3. **Generate images** (text layout and spacing):
    - `python scripts/thumbnail.py <deck>.pptx <slides-dir>/thumbnails --slides-dir <slides-dir>/`
-   - This produces individual slide images + a grid thumbnail. Works with or without LibreOffice.
-3. **Analyze**:
-   - Content scope: assess messages, data accuracy, completeness, flow, conciseness
-   - Style scope: spawn `qa-reviewer` sub-agent with slide images and the inspection checklist
-   - Full scope: both
-4. **Write review report**
+   - Images show text positions, spacing, and alignment
+   - With LibreOffice installed, images also show full visual fidelity (shapes, colors, etc.)
+4. **Analyze** — combine sources:
+   - Content (from markitdown): messages, data accuracy, completeness, flow
+   - Visual elements (from XML): shapes, colors, connectors, images, design system
+   - Text layout (from images): spacing, alignment, overflow, positioning
+   - For style scope: spawn `qa-reviewer` sub-agent with slide images + summary of XML visual findings
+5. **Write review report**
+   - Be explicit about what was verified from XML vs. images
+   - If LibreOffice is not installed, note that full visual composition rendering is available by installing it
 
 ### For document input
 

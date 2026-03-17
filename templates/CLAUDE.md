@@ -52,8 +52,8 @@ This repo is fully standalone. All tools are included:
 | `pack.py` | `python scripts/pack.py unpacked/ output.pptx --original input.pptx` — repack with validation |
 | `clean.py` | `python scripts/clean.py unpacked/` — remove orphaned slides/media |
 | `add_slide.py` | `python scripts/add_slide.py unpacked/ slide2.xml` — duplicate a slide |
-| `thumbnail.py` | `python scripts/thumbnail.py input.pptx [prefix] --slides-dir DIR` — create visual grid + individual slide images |
-| `soffice.py` | `python scripts/soffice.py input.pptx --output-dir slides/` — high-fidelity slide images |
+| `thumbnail.py` | `python scripts/thumbnail.py input.pptx [prefix] --slides-dir DIR` — slide images for text layout and spacing; full visual fidelity with LibreOffice. **Use this in all agent workflows.** |
+| `soffice.py` | `python scripts/soffice.py input.pptx --output-dir slides/` — standalone LibreOffice utility. Requires LibreOffice, hard-fails without it. **Not for agent workflows.** |
 
 ### Text Extraction
 - `python -m markitdown input.pptx` — extract text content from slides
@@ -293,4 +293,4 @@ Configured in `.ppt/config.md`:
 - **LibreOffice**: `brew install --cask libreoffice` — for PDF/image conversion
 - **Poppler**: `brew install poppler` — for `pdftoppm` (PDF → slide images)
 
-Without LibreOffice/Poppler, `thumbnail.py` falls back to a python-pptx renderer (lower fidelity but functional).
+Without LibreOffice/Poppler, `thumbnail.py` uses its built-in renderer for text layout and spacing. Visual elements (shapes, colors, connectors) in existing decks are assessed via XML inspection (unpack + read slide XMLs). Install LibreOffice + Poppler for full visual rendering.

@@ -116,7 +116,7 @@ Each action supports **plan mode** (iterate on content/style plans before buildi
 
 1. User describes what they want
 2. Agent and user collaboratively build a content plan and/or style plan
-3. Plans approved → sub-agents build slides in parallel (for decks >5 slides)
+3. Plans approved → sub-agents build slides in parallel (for decks >12 slides)
 4. QA sub-agent inspects with fresh eyes
 5. Fix-and-verify loop until clean
 6. Deliver final `.pptx`
@@ -130,6 +130,6 @@ Each action supports **plan mode** (iterate on content/style plans before buildi
 ### Visual QA
 
 Every deck goes through visual QA before delivery:
-1. Convert slides to images (soffice → PDF → pdftoppm, or python-pptx fallback)
+1. Convert slides to images (thumbnail.py — uses soffice if available, python-pptx fallback)
 2. Sub-agent inspects each slide for overlaps, contrast, spacing, alignment
 3. Issues fixed and re-verified

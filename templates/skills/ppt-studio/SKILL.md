@@ -103,9 +103,9 @@ For the first build, use `v1/`.
 
 ### Build Phase (PptxGenJS from scratch)
 
-For decks with >5 slides:
+For decks with >12 slides:
 
-1. **Divide slides** into groups of 2-4 by visual similarity
+1. **Divide slides** by sub-topic or section — each agent owns a coherent group
 2. **Spawn `slide-builder` agents** — each gets:
    - Their assigned slides from the **content plan** (what to build)
    - The **style plan** or theme JSON (how it looks)
@@ -115,11 +115,11 @@ For decks with >5 slides:
 3. **Assemble** — main agent creates wrapper script, inlines sub-agent functions, runs it
 4. **Output** goes to `.ppt/decks/<name>/v<n>/<name>.pptx`
 
-For decks with ≤5 slides: build directly, no sub-agents.
+For decks with ≤12 slides: build directly in a single PptxGenJS script.
 
 ### Edit Phase (XML editing)
 
-For improving existing decks with >3 slides to edit:
+For improving existing decks with >8 slides to edit:
 
 1. **Unpack** the `.pptx`: `python scripts/unpack.py <deck>.pptx unpacked/`
 2. **Spawn `slide-editor` agents** — each gets:
@@ -133,7 +133,7 @@ For improving existing decks with >3 slides to edit:
 
 Always use a sub-agent for visual QA:
 
-1. **Convert** to images: `python scripts/soffice.py <deck>.pptx --output-dir slides/`
+1. **Convert** to images: `python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/`
 2. **Spawn `qa-reviewer` agent** with:
    - Slide image paths
    - **Content plan** for completeness checks (expected content per slide)

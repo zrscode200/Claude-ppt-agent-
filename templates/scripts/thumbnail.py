@@ -257,12 +257,14 @@ def _wrap_text(draw: ImageDraw.Draw, text: str, font, max_width: int) -> list[st
 
 
 def convert_to_images(pptx_path: Path, temp_dir: Path) -> list[Path]:
-    """Convert .pptx to slide images. Uses soffice if available, falls back to python-pptx."""
+    """Convert .pptx to slide images. Uses LibreOffice if available, otherwise built-in renderer."""
     if has_soffice():
         images = convert_to_images_soffice(pptx_path, temp_dir)
         if images:
             return images
-        print("  soffice conversion failed, falling back to python-pptx renderer", file=sys.stderr)
+        print("NOTE: LibreOffice conversion failed, using built-in renderer.", file=sys.stderr)
+    else:
+        print("NOTE: Using built-in renderer (text layout and backgrounds). Install LibreOffice + Poppler for full visual rendering.", file=sys.stderr)
 
     return convert_to_images_pptx(pptx_path, temp_dir)
 
