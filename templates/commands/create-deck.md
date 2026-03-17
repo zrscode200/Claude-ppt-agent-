@@ -22,6 +22,7 @@ Follow the user's thread naturally. Probe for:
 - Tone (formal, casual, technical, creative?)
 - Visual direction (dark, minimal, bold, branded?)
 - Any existing content, data, or documents to incorporate
+- Reference `.pptx` for style matching (→ extract style per `/create` planning flow)
 
 **Before moving to planning**, verify you have enough to work with:
 
