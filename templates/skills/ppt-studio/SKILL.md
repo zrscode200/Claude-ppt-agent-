@@ -101,17 +101,23 @@ For the first build, use `v1/`.
 
 ## Sub-Agent Orchestration
 
-### Style Extraction Phase (reference .pptx analysis)
+### Style Extraction Phase
 
-When the user provides a reference `.pptx` for style matching:
+Use the `style-extractor` agent whenever the agent needs to understand a deck's visual design system:
 
+**When creating from a reference `.pptx`** ("match this style"):
 1. **Main agent extracts structured data**: unpack, read `ppt/theme/theme1.xml` (color scheme as hex, font scheme as family names)
 2. **Generate slide images**: `python scripts/thumbnail.py <ref>.pptx ref-thumbnails --slides-dir unpacked-ref/slides/`
-3. **Spawn `style-extractor` agent** with:
-   - Individual slide image paths from `unpacked-ref/slides/`
-   - Theme summary (color hex values + font names extracted from XML)
+3. **Spawn `style-extractor` agent** with slide image paths + theme summary
 4. **Receive extraction report** — covers background strategy, layout vocabulary, shape language, color application, typography, motif, spacing, image treatment
 5. **Main agent uses report** to seed the style plan discussion with the user
+
+**When editing with style scope** ("make it more modern", "switch to dark theme"):
+1. **Unpack + read theme** from the existing deck
+2. **Generate slide images**: `python scripts/thumbnail.py <deck>.pptx edit-thumbnails --slides-dir unpacked/slides/`
+3. **Spawn `style-extractor` agent** with slide image paths + theme summary
+4. **Receive extraction report** — understand current design system before planning changes
+5. **Main agent uses report** to plan style edits (what to change from what)
 
 ### Build Phase (PptxGenJS from scratch)
 

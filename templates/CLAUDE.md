@@ -160,7 +160,7 @@ Theme structure:
 ## Sub-Agents
 
 ### When to use
-- **Style extraction**: When user provides a reference `.pptx` — spawn `style-extractor` agent to analyze slide images and produce a structured style report. The main agent handles XML/theme extraction; the sub-agent handles visual analysis.
+- **Style extraction**: (1) When user provides a reference `.pptx` — analyze its visual design to seed a style plan. (2) When editing with style scope — understand the current deck's design system before planning changes. In both cases, spawn `style-extractor` agent with slide images + theme summary.
 - **Create (build phase)**: Decks with >12 slides — split by sub-topic, each `slide-builder` agent owns a coherent section. For <=12 slides, build in a single script.
 - **Review (QA)**: Always spawn `qa-reviewer` agent (fresh eyes principle)
 - **Edit (apply phase)**: When editing >8 slides — spawn `slide-editor` agents for parallel XML editing. For <=8 slides, edit directly.

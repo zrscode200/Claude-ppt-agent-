@@ -50,6 +50,15 @@ For broader changes:
 
 ### Planning Phase
 
+**If scope includes style**, first understand the current design system:
+1. Unpack: `python scripts/unpack.py <deck>.pptx unpacked/`
+2. Read theme: `unpacked/ppt/theme/theme1.xml` → color scheme, font scheme
+3. Generate individual slide images: `python scripts/thumbnail.py <deck>.pptx edit-thumbnails --slides-dir unpacked/slides/`
+4. Spawn `style-extractor` sub-agent with: slide image paths from `unpacked/slides/` + theme summary (colors + fonts from step 2)
+5. Use the extraction report to understand the current style before planning changes
+
+For content-only scope, skip the above — use `python -m markitdown <deck>.pptx` and `python scripts/thumbnail.py <deck>.pptx` for a quick overview instead.
+
 Create only the relevant edit plan(s). Present changes inline for the user to react to:
 
 **Content changes:**
