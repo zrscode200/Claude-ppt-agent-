@@ -34,7 +34,7 @@ The bootstrap script stamps the target directory with:
 
 - **CLAUDE.md** — Agent operating manual (primes Claude as a PPT specialist)
 - **6 slash commands** — 3 fundamental actions + 3 composed workflows
-- **3 agent definitions** — Sub-agents for parallel slide building, editing, and QA
+- **4 agent definitions** — Sub-agents for style extraction, slide building, editing, and QA
 - **1 skill** — Intent routing (auto-triggers on PPT-related requests)
 - **2 hooks** — Session context injection (active decks, current phase)
 - **6 utility scripts** — Unpack, pack, clean, add slide, thumbnails, PDF conversion

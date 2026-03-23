@@ -25,10 +25,10 @@ Run `/review` on the source document:
 When the source is an existing `.pptx`, also extract its design language:
 
 1. Unpack: `python scripts/unpack.py <source>.pptx unpacked-ref/`
-2. Read `unpacked-ref/ppt/theme/theme1.xml` → color scheme (dk1, lt1, accent1-6), font scheme (major/minor)
-3. Inspect 2-3 slide XMLs → layout patterns, shape usage, background fills, spacing
-4. Generate thumbnail: `python scripts/thumbnail.py <source>.pptx`
-5. Summarize: colors, fonts, motif, background strategy, layout vocabulary
+2. Read `unpacked-ref/ppt/theme/theme1.xml` → color scheme (dk1, lt1, accent1-6 as hex), font scheme (major/minor family)
+3. Generate individual slide images: `python scripts/thumbnail.py <source>.pptx ref-thumbnails --slides-dir unpacked-ref/slides/`
+4. Spawn `style-extractor` sub-agent with: slide image paths from `unpacked-ref/slides/` + theme summary (colors + fonts from step 2)
+5. Use the style extraction report to seed the style plan (colors, fonts, motif, background strategy, layout vocabulary)
 
 This extraction seeds the style plan in Step 2. The user can keep, modify, or discard the extracted style.
 

@@ -1,6 +1,42 @@
 # Sub-Agent Prompt Templates
 
-Templates for spawning sub-agents during build and QA phases.
+Templates for spawning sub-agents during style extraction, build, and QA phases.
+
+## Style Extractor Prompt
+
+Use when the user provides a reference `.pptx` and the main agent needs a structured style analysis.
+
+```
+Analyze the visual style of this reference presentation. Reverse-engineer its design system.
+
+## Slide Images
+{SLIDE_IMAGE_LIST}
+
+## Theme Summary (from XML)
+{THEME_SUMMARY}
+
+## Instructions
+
+Study every slide image and extract the visual design system across these 8 dimensions:
+
+1. **Background strategy** — dark/light/mixed, solid/gradient/image fills, structural pattern
+2. **Layout vocabulary** — what layout types appear, how they're sequenced, content density
+3. **Shape language** — shapes used (rects, circles, lines), corners, shadows, decorative vs. functional
+4. **Color application** — how each theme color maps to visual elements (headers, backgrounds, accents, etc.)
+5. **Typography patterns** — size hierarchy, weight, alignment, case, character spacing
+6. **Motif / signature element** — the one distinctive element carried throughout, how it adapts per layout
+7. **Spacing conventions** — margins, gaps, density, alignment tendency
+8. **Image treatment** — usage patterns, placement, crops, overlays, icon style
+
+Map observed colors to theme slots: primary, secondary, accent, bg_dark, bg_light, text_on_dark, text_on_light, muted.
+
+Read the agent definition at .claude/agents/style-extractor.md for the full checklist and output format.
+
+Read and analyze these images:
+{IMAGE_PATHS_WITH_DESCRIPTIONS}
+
+Return the full Style Extraction Report.
+```
 
 ## Slide Builder Prompt
 

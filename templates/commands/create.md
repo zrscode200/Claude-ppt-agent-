@@ -53,10 +53,10 @@ Background: dark-sandwich (dark bookends, light content)
 
 **If user provides a reference `.pptx`** ("match this style", "use this as a template"):
 1. Unpack: `python scripts/unpack.py <ref>.pptx unpacked-ref/`
-2. Read theme: `unpacked-ref/ppt/theme/theme1.xml` → extract color scheme, font scheme
-3. Inspect 2-3 slide XMLs → identify layout patterns, shape usage, spacing conventions
-4. Generate thumbnail for visual reference: `python scripts/thumbnail.py <ref>.pptx`
-5. Translate findings into the style plan — map extracted colors to primary/secondary/accent, fonts to header/body, observed layouts to per-slide layout suggestions
+2. Read theme: `unpacked-ref/ppt/theme/theme1.xml` → extract color scheme (dk1, lt1, accent1-6 as hex), font scheme (major/minor family)
+3. Generate individual slide images: `python scripts/thumbnail.py <ref>.pptx ref-thumbnails --slides-dir unpacked-ref/slides/`
+4. Spawn `style-extractor` sub-agent with: slide image paths from `unpacked-ref/slides/` + theme summary (colors + fonts from step 2)
+5. Use the style extraction report to seed the style plan — map extracted colors to primary/secondary/accent, fonts to header/body, observed layouts and motif to per-slide layout suggestions
 
 Same iteration flow → `style-plan-approved.md`.
 

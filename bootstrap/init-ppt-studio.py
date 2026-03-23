@@ -38,6 +38,7 @@ REQUIRED_FILES = [
     "commands/improve-deck.md",
     "commands/deck-from-doc.md",
     "skills/ppt-studio/SKILL.md",
+    "agents/style-extractor.md",
     "agents/slide-builder.md",
     "agents/slide-editor.md",
     "agents/qa-reviewer.md",
