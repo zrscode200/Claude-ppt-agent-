@@ -11,9 +11,11 @@ Analyze input and produce a structured assessment. This is a fundamental action 
 
 Accept any of:
 - `.pptx` file (existing deck)
-- Document (`.md`, `.txt`, `.docx`, `.pdf`) — use `python -m markitdown` for docx/pdf
+- Document (`.md`, `.txt`, `.docx`, `.pdf`) — use `python -m markitdown` for docx/pdf, except previous review reports (`review-*.md`)
 - Slide images (`.jpg`, `.png`)
 - Pasted text in conversation
+
+**Do not** read previous review reports (`review-*.md`) from the deck folder — see Fresh Eyes Rule below.
 
 If `$ARGUMENTS` is provided, treat it as the input path.
 

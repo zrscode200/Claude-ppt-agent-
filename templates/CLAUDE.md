@@ -95,6 +95,7 @@ For edits in plan mode: `edit-content-plan-draft-<n>.md`, `edit-style-plan-draft
 - Each build/edit cycle produces a new version folder (`v1/`, `v2/`, ...)
 - The changelog in each version (after v1) records what changed
 - Plans and reviews live at deck level (shared across versions)
+- Review reports are audit trail — analyze decks from primary sources (thumbnails, markitdown, XML), not previous reviews, unless the user explicitly references one
 - Slide images are generated for every version
 
 ## Workspace Structure
@@ -258,6 +259,7 @@ See `.claude/skills/ppt-studio/references/design-guide.md` for full design refer
 - **QA uses sub-agents** — fresh eyes catch what you miss. Always spawn `qa-reviewer`.
 - **Fix-and-verify loop** — one fix often creates another problem; re-verify affected slides
 - **At least one fix-and-verify cycle** before declaring success — zero-issue first pass means you weren't looking hard enough
+- **Fresh eyes on every analysis** — do not read previous review reports (`review-*.md`) when analyzing a deck. Always work from primary sources (thumbnails, markitdown, XML). Only reference a previous review if the user explicitly points to it.
 
 ## Autonomy Modes
 

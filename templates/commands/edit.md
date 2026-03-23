@@ -28,6 +28,10 @@ Detect what kind of change is needed:
 | **Style** | "make it more modern", "switch to dark theme", "fix the layouts" | `edit-style-plan` |
 | **Both** | "redesign the data section with new charts", "overhaul slides 3-5" | Both plans |
 
+## Fresh Eyes Rule
+
+When analyzing a deck, do not read previous review reports (`review-*.md`). Analyze from primary sources — thumbnails, markitdown, and XML. Only reference a previous review if the user explicitly points to it.
+
 ## Direct Mode
 
 For small, targeted changes:
@@ -35,6 +39,7 @@ For small, targeted changes:
 1. **Analyze** the deck:
    - `python scripts/thumbnail.py <deck>.pptx` for visual overview
    - `python -m markitdown <deck>.pptx` for content extraction
+   - Do not read previous `review-*.md` files (see Fresh Eyes Rule)
 2. **Apply** changes using the unpack/edit/pack workflow:
    - `python scripts/unpack.py <deck>.pptx unpacked/`
    - Edit the relevant slide XML files
@@ -56,6 +61,8 @@ For broader changes:
 3. Generate individual slide images: `python scripts/thumbnail.py <deck>.pptx edit-thumbnails --slides-dir unpacked/slides/`
 4. Spawn `style-extractor` sub-agent with: slide image paths from `unpacked/slides/` + theme summary (colors + fonts from step 2)
 5. Use the extraction report to understand the current style before planning changes
+
+Do not read previous `review-*.md` files (see Fresh Eyes Rule).
 
 For content-only scope, skip the above — use `python -m markitdown <deck>.pptx` and `python scripts/thumbnail.py <deck>.pptx` for a quick overview instead.
 
