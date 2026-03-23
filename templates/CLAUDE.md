@@ -293,4 +293,4 @@ Configured in `.ppt/config.md`:
 - **LibreOffice**: `brew install --cask libreoffice` — for PDF/image conversion
 - **Poppler**: `brew install poppler` — for `pdftoppm` (PDF → slide images)
 
-Without LibreOffice/Poppler, `thumbnail.py` uses its built-in renderer for text layout and spacing. Visual elements (shapes, colors, connectors) in existing decks are assessed via XML inspection (unpack + read slide XMLs). Install LibreOffice + Poppler for full visual rendering.
+Without LibreOffice/Poppler, `thumbnail.py` uses its enhanced built-in renderer which covers backgrounds (with layout/master fallback), embedded images, shapes (rectangles, ovals, rounded rects with fills and borders), tables with cell styling, and text with actual font sizes, colors, and alignment. System TrueType fonts are used when available. Install LibreOffice + Poppler for pixel-perfect visual rendering.
