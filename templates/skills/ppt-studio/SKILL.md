@@ -149,20 +149,18 @@ For improving existing decks with >8 slides to edit:
 
 ### QA Phase (Review as sub-action)
 
-Always use sub-agents for visual QA:
+Always use sub-agents for visual QA — per-section deep inspection + holistic cross-slide review:
 
 1. **Unpack** (if not already unpacked): `python scripts/unpack.py <deck>.pptx unpacked/`
 2. **Convert** to images: `python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/`
-3. **Spawn `qa-reviewer` agent(s)** with:
-   - Slide image paths
-   - Raw slide XML files + theme XML (from unpacked/) — the reviewer uses these as ground truth
-   - Diagram asset images (if any were generated programmatically)
-   - **Content plan** for completeness checks (expected content per slide)
-   - **Style plan** for visual consistency checks (theme, layouts, motif)
+3. **Spawn QA agents in parallel**:
+   - **Section agents** (one per section/topic group): each gets its section's slide images, raw slide XML + theme XML, diagram assets (if any), and the relevant slice of the content + style plans. See `subagent-prompts.md` for grouping rules.
+   - **Holistic agent** (one): gets all slide thumbnails + full style plan. Checks cross-slide consistency only (motif, layout variety, color coherence, section transitions).
    - If a plan was skipped, use markitdown extraction or defaults instead
-4. **Fix** reported issues
-5. **Re-verify** affected slides (spawn another QA agent if needed)
-6. **Save** findings to `.ppt/decks/<deck-name>/review-<n>.md`
+4. **Merge** findings from all QA agents into a single review report
+5. **Fix** reported issues
+6. **Re-verify** affected slides (spawn section QA agent(s) for those slides)
+7. **Save** findings to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ## References
 

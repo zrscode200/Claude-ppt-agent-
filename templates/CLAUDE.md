@@ -163,16 +163,17 @@ Theme structure:
 ### When to use
 - **Style extraction**: (1) When user provides a reference `.pptx` — analyze its visual design to seed a style plan. (2) When editing with style scope — understand the current deck's design system before planning changes. In both cases, spawn `style-extractor` agent with slide images + theme summary.
 - **Create (build phase)**: Decks with >12 slides — split by sub-topic, each `slide-builder` agent owns a coherent section. For <=12 slides, build in a single script.
-- **Review (QA)**: Always spawn `qa-reviewer` agent (fresh eyes principle)
+- **Review (QA)**: Always spawn `qa-reviewer` agents — per-section agents for deep per-slide inspection + one holistic agent for cross-slide consistency. Fresh eyes principle.
 - **Edit (apply phase)**: When editing >8 slides — spawn `slide-editor` agents for parallel XML editing. For <=8 slides, edit directly.
 
 ### How to divide work
 - **Style extraction**: sub-agent receives individual slide images + theme summary (colors + fonts), returns a style extraction report
-- Group slides by sub-topic or section (not arbitrarily) — each agent should own a coherent group
-- Each sub-agent gets: **content plan** (what to build) + **style plan** (how it looks) + API reference
+- **Build / Edit**: group slides by sub-topic or section (not arbitrarily) — each agent should own a coherent group
+- Each build/edit sub-agent gets: **content plan** (what to build) + **style plan** (how it looks) + API reference
 - If a plan was skipped, pass the defaults the agent is using instead
 - For PptxGenJS: each sub-agent writes a function that adds slides to a `pres` object
 - For XML editing: each sub-agent edits its assigned slide files directly
+- **QA**: group by content plan sections (or ~4-5 slides if no plan). Each section QA agent gets its slides' images, raw XML + theme XML, diagram assets, and relevant plan excerpts. The holistic QA agent gets all thumbnails + full style plan. All QA agents run in parallel.
 
 ### Assembly (PptxGenJS)
 1. Main agent writes the wrapper (imports, theme constants, pres init)
@@ -256,7 +257,7 @@ See `.claude/skills/ppt-studio/references/design-guide.md` for full design refer
 - **No default blue** — pick colors that reflect the topic
 - **No repeated layouts** — vary across slides
 - **Visual QA is mandatory** — NEVER go directly from build to delivery. Always run QA between build and delivery.
-- **QA uses sub-agents** — fresh eyes catch what you miss. Always spawn `qa-reviewer`.
+- **QA uses sub-agents** — fresh eyes catch what you miss. Spawn per-section `qa-reviewer` agents + one holistic `qa-reviewer` agent.
 - **Fix-and-verify loop** — one fix often creates another problem; re-verify affected slides
 - **At least one fix-and-verify cycle** before declaring success — zero-issue first pass means you weren't looking hard enough
 - **Fresh eyes on every analysis** — do not read previous review reports (`review-*.md`) when analyzing a deck. Always work from primary sources (thumbnails, markitdown, XML). Only reference a previous review if the user explicitly points to it.

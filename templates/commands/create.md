@@ -79,18 +79,18 @@ Same iteration flow → `style-plan-approved.md`.
 
 **DO NOT skip QA. DO NOT go directly from build to delivery.**
 
-1. Generate slide images:
+1. Unpack the freshly built deck: `python scripts/unpack.py <deck>.pptx unpacked/`
+2. Generate slide images:
    ```
    python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/
    ```
-   This produces individual slide images (`slide-01.jpg`, `slide-02.jpg`, ...) for QA inspection, plus a grid thumbnail. Works with or without LibreOffice.
-2. Spawn `qa-reviewer` sub-agent with:
-   - Individual slide images from `v<n>/slides/`
-   - Content plan for completeness checks (plan mode), or markitdown extraction (direct mode)
-   - Style plan for visual consistency checks (plan mode), or visual inspection only (direct mode)
-3. Fix reported issues
-4. Re-generate images for affected slides and re-verify — at least one fix-and-verify cycle
-5. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
+3. Spawn QA agents in parallel:
+   - **Section agents** (one per content plan section, or ~4-5 slides if direct mode): each gets its section's slide images, raw slide XML + theme XML from `unpacked/`, diagram assets (if any), and relevant plan excerpts (or markitdown extraction in direct mode)
+   - **Holistic agent** (one): gets all slide thumbnails + full style plan. Cross-slide consistency only.
+4. Merge findings from all QA agents
+5. Fix reported issues
+6. Re-generate images for affected slides and re-verify — at least one fix-and-verify cycle
+7. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ### Delivery
 

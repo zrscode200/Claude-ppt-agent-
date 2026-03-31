@@ -104,84 +104,75 @@ Read the agent definition at .claude/agents/slide-editor.md for full rules.
 
 Include only the relevant section(s) — if the edit is content-only, omit the style changes section and vice versa.
 
-## QA Reviewer Prompt
+## QA Section Reviewer Prompt
 
-Use when spawning `qa-reviewer` agents.
+Use when spawning `qa-reviewer` agents in **section mode**. Spawn one per section/topic group. These run in parallel.
 
 ```
-Visually inspect these slides. Assume there are issues — find them.
+You are reviewing slides {START} through {END} ("{SECTION_NAME}"). Assume there are issues — find them.
 
-## Slide Images
-{SLIDE_IMAGE_LIST}
+**Mode: Section** — deep per-slide inspection of your assigned slides.
 
-## Diagram Assets
-{DIAGRAM_ASSET_LIST}
-<!-- Main agent: list each generated diagram image with its target slide, e.g.
-     "slide09_network_diagram.png → used in slide 9"
-     May be PNG, SVG, JPG, or other formats. Omit this section entirely if no diagrams were generated as images. -->
+## Slide Images (your section only)
+{SECTION_SLIDE_IMAGE_LIST}
+
+## Diagram Assets (your section only)
+{SECTION_DIAGRAM_ASSET_LIST}
+<!-- Main agent: list each generated diagram image for this section with its target slide.
+     May be PNG, SVG, JPG, or other formats. Omit if no diagrams in this section. -->
 
 ## Slide XML + Theme
-{SLIDE_XML_PATHS}
-<!-- Main agent: always provide the raw slide XML files for the assigned slides,
-     plus the theme XML (ppt/theme/theme1.xml). For create: unpack the freshly
-     built .pptx. For edit: use the already-unpacked XML from the edit phase.
-     The qa-reviewer uses these as ground truth to verify colors, fonts,
-     positions, and element structure against what it sees in the images. -->
+{SECTION_SLIDE_XML_PATHS}
+<!-- Main agent: provide the raw XML for this section's slides + theme XML (ppt/theme/theme1.xml).
+     For create: unpack the freshly built .pptx. For edit: use the already-unpacked XML.
+     The reviewer uses these as ground truth — thumbnails may not render everything. -->
 
-## Expected Content Per Slide (from content plan)
-{CONTENT_PLAN_SUMMARY}
+## Expected Content (from content plan — your section only)
+{SECTION_CONTENT_PLAN}
 
-## Expected Visual Style (from style plan)
-{STYLE_PLAN_SUMMARY}
+## Expected Visual Style (from style plan — your section only)
+{SECTION_STYLE_PLAN}
 
-## Inspection Checklist
+Read the agent definition at .claude/agents/qa-reviewer.md for the full section mode checklist and output format.
 
-### Content (check against content plan)
-- Missing content that should be there per the content plan
-- Wrong data or numbers
-- Leftover placeholder content
-- Typos or truncated text
-
-### Visual Style (check against style plan)
-- Theme colors applied correctly
-- Correct layouts per the style plan
-- Visual motif consistent across slides
-- Same layout repeated on consecutive slides
-- Text-only slides with no visual elements
-
-### Diagrams & Embedded Images (when diagram assets are provided)
-- Labels readable at slide scale (not just when zoomed into the raw PNG)
-- Arrows and connectors point to their correct targets
-- Visual hierarchy clear (primary elements larger/bolder than secondary)
-- Color palette matches the deck theme (no off-brand colors from library defaults)
-- Sufficient contrast between adjacent elements within the diagram
-- Diagram communicates its message without requiring study — not cluttered
-- Proper fit within slide (not stretched, cropped, or leaving dead space)
-
-### Layout & Spacing
-- Overlapping elements (text through shapes, lines through words, stacked elements)
-- Text overflow or cut off at edges/box boundaries
-- Decorative lines positioned for single-line text but title wrapped to two lines
-- Source citations or footers colliding with content above
-- Elements too close (< 0.3" gaps) or cards/sections nearly touching
-- Uneven gaps (large empty area in one place, cramped in another)
-- Insufficient margin from slide edges (< 0.5")
-- Columns or similar elements not aligned consistently
-
-### Typography & Contrast
-- Low-contrast text (light gray on cream, etc.)
-- Low-contrast icons (dark icons on dark backgrounds without contrasting circle)
-- Text boxes too narrow causing excessive wrapping
-
-Read the agent definition at .claude/agents/qa-reviewer.md for the full checklist and output format.
-
-For each slide, list ALL issues found, including minor ones. Report severity: CRITICAL, IMPORTANT, or MINOR.
+For each slide in your section, list ALL issues found, including minor ones. Report severity: CRITICAL, IMPORTANT, or MINOR.
 
 Read and analyze these images:
-{IMAGE_PATHS_WITH_DESCRIPTIONS}
+{SECTION_IMAGE_PATHS_WITH_DESCRIPTIONS}
 
 Report ALL issues found.
 ```
+
+### How to group sections
+
+- **If content plan exists**: group by sections defined in the plan (e.g., "Section I: slides 3-7", "Section II: slides 8-11"). Title/agenda slides form their own group ("Bookends: slides 1-2").
+- **If no content plan**: group by ~4-5 slides each.
+- Each section agent gets only its section's slice of the content plan, style plan, slide images, XML files, and diagram assets.
+
+## QA Holistic Reviewer Prompt
+
+Use when spawning a `qa-reviewer` agent in **holistic mode**. Spawn exactly one, in parallel with the section agents.
+
+```
+Scan the full deck for cross-slide consistency issues. The section agents are handling per-slide inspection — your job is to catch what only a full-deck view reveals.
+
+**Mode: Holistic** — cross-slide consistency only. Do NOT do per-slide deep inspection.
+
+## All Slide Thumbnails
+{ALL_SLIDE_IMAGE_LIST}
+
+## Expected Visual Style (from style plan — full)
+{FULL_STYLE_PLAN}
+
+Read the agent definition at .claude/agents/qa-reviewer.md for the full holistic mode checklist and output format.
+
+Read and analyze these images:
+{ALL_IMAGE_PATHS_WITH_DESCRIPTIONS}
+
+Report ALL cross-slide issues found.
+```
+
+### Notes for both prompts
 
 If a plan was skipped, replace its section with markitdown extraction or defaults.
 

@@ -101,17 +101,18 @@ Same iteration flow as Create — increment drafts, never overwrite, approve whe
 
 ### QA Phase
 
-Run a Review (style scope) on changed slides:
+Run a Review on changed slides. The unpacked XML from the edit phase is already available.
 
 1. Generate slide images:
    ```
    python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/
    ```
-2. Spawn `qa-reviewer` sub-agent with:
-   - Individual slide images from `v<n>/slides/`
-   - Edit plan(s) for reference (what was intended)
-3. Fix issues, re-verify — at least one fix-and-verify cycle
-4. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
+2. Spawn QA agents in parallel:
+   - **Section agents** (one per section affected by edits): each gets its section's slide images, raw slide XML + theme XML from the already-unpacked directory, diagram assets (if any), and relevant edit plan excerpts
+   - **Holistic agent** (one): gets all slide thumbnails + style plan. Cross-slide consistency only.
+3. Merge findings from all QA agents
+4. Fix issues, re-verify — at least one fix-and-verify cycle
+5. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ### Changelog
 

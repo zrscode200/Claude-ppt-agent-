@@ -36,22 +36,19 @@ Default to **full** if ambiguous.
 ### For `.pptx` input
 
 1. **Extract content**: `python -m markitdown <deck>.pptx`
-2. **Inspect visual structure** (if scope includes style):
-   - `python scripts/unpack.py <deck>.pptx unpacked/`
-   - Read `unpacked/ppt/theme/theme1.xml` → color scheme, font scheme
-   - Sample 3-5 slide XMLs → identify shapes (`<p:sp>`), connectors (`<p:cxnSp>`), groups (`<p:grpSp>`), images (`<p:pic>`), fills (`<a:solidFill>`), tables, charts
-   - This is how you determine what visual elements the deck contains
+2. **Unpack**: `python scripts/unpack.py <deck>.pptx unpacked/`
 3. **Generate images** (text layout and spacing):
    - `python scripts/thumbnail.py <deck>.pptx <slides-dir>/thumbnails --slides-dir <slides-dir>/`
    - Images show text positions, spacing, and alignment
    - With LibreOffice installed, images also show full visual fidelity (shapes, colors, etc.)
 4. **Analyze** — combine sources:
    - Content (from markitdown): messages, data accuracy, completeness, flow
-   - Visual elements (from XML): shapes, colors, connectors, images, design system
-   - Text layout (from images): spacing, alignment, overflow, positioning
-   - For style scope: spawn `qa-reviewer` sub-agent with slide images + summary of XML visual findings
+   - For style scope: spawn QA agents in parallel:
+     - **Section agents**: each gets its section's slide images, raw slide XML + theme XML from `unpacked/`, and content summary from markitdown
+     - **Holistic agent**: gets all slide thumbnails, checks cross-slide consistency
+   - For content-only scope: main agent reviews content structure and flow directly
 5. **Write review report**
-   - Be explicit about what was verified from XML vs. images
+   - Merge QA agent findings (if style scope) with main agent's content analysis
    - If LibreOffice is not installed, note that full visual composition rendering is available by installing it
 
 ### For document input
@@ -62,8 +59,8 @@ Default to **full** if ambiguous.
 
 ### For slide images
 
-1. **Spawn `qa-reviewer` sub-agent** with images and checklist
-2. **Write review report** from findings
+1. **Spawn QA agents** — section agents (grouped by ~4-5 slides) + holistic agent, all with the provided images
+2. **Write review report** from merged findings
 
 ## Review Report Format
 
@@ -118,18 +115,6 @@ If this Review is part of a composed workflow, the report is always saved — it
 - **Structure**: Logical order, good pacing, appropriate slide count
 - **Visual Consistency**: Same motif throughout, consistent spacing/fonts/colors
 
-## Visual QA Checklist (for style scope)
+## Visual QA (for style scope)
 
-When spawning the `qa-reviewer` agent, include this checklist:
-
-- Overlapping elements (text through shapes, lines through words)
-- Text overflow or cut off at edges/box boundaries
-- Elements too close (< 0.3" gaps) or nearly touching
-- Uneven spacing (large empty area vs. cramped area)
-- Insufficient margin from slide edges (< 0.5")
-- Columns or similar elements not aligned consistently
-- Low-contrast text or icons
-- Text boxes too narrow causing excessive wrapping
-- Leftover placeholder content
-- Same layout repeated on consecutive slides
-- Text-only slides without visual elements
+Spawn QA agents per the standard pattern (see `subagent-prompts.md` for section and holistic prompt templates). The full inspection checklists live in `.claude/agents/qa-reviewer.md` — do not duplicate them here.
