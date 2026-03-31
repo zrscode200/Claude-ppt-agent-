@@ -84,9 +84,9 @@ Same iteration flow → `style-plan-approved.md`.
    ```
    python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/
    ```
-3. Spawn QA agents in parallel:
-   - **Section agents** (one per content plan section, or ~4-5 slides if direct mode): each gets its section's slide images, raw slide XML + theme XML from `unpacked/`, diagram assets (if any), and relevant plan excerpts (or markitdown extraction in direct mode)
-   - **Holistic agent** (one): gets all slide thumbnails + full style plan. Cross-slide consistency only.
+3. Spawn QA agents — scale to the deck:
+   - **≤6 slides**: single `qa-reviewer` (section mode) covering all slides with all images, XML, diagrams, and plans
+   - **>6 slides**: per-section agents (one per content plan section, or grouped by section dividers in direct mode) + one holistic agent. Each section agent gets its slice of images, XML, diagrams, and plans. Holistic agent gets all thumbnails + full style plan.
 4. Merge findings from all QA agents
 5. Fix reported issues
 6. Re-generate images for affected slides and re-verify — at least one fix-and-verify cycle

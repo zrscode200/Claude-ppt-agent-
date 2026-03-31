@@ -107,9 +107,9 @@ Run a Review on changed slides. The unpacked XML from the edit phase is already 
    ```
    python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/
    ```
-2. Spawn QA agents in parallel:
-   - **Section agents** (one per section affected by edits): each gets its section's slide images, raw slide XML + theme XML from the already-unpacked directory, diagram assets (if any), and relevant edit plan excerpts
-   - **Holistic agent** (one): gets all slide thumbnails + style plan. Cross-slide consistency only.
+2. Spawn QA agents — scale to the change:
+   - **≤6 slides changed**: single `qa-reviewer` (section mode) covering all changed slides with their images, XML from the already-unpacked directory, diagram assets, and edit plan excerpts
+   - **>6 slides changed**: per-section agents (grouped by the section each changed slide belongs to) + one holistic agent. Holistic gets all slide thumbnails + style plan.
 3. Merge findings from all QA agents
 4. Fix issues, re-verify — at least one fix-and-verify cycle
 5. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`

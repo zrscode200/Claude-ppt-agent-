@@ -149,18 +149,26 @@ For improving existing decks with >8 slides to edit:
 
 ### QA Phase (Review as sub-action)
 
-Always use sub-agents for visual QA — per-section deep inspection + holistic cross-slide review:
+Always use sub-agents for visual QA:
 
 1. **Unpack** (if not already unpacked): `python scripts/unpack.py <deck>.pptx unpacked/`
 2. **Convert** to images: `python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/`
-3. **Spawn QA agents in parallel**:
-   - **Section agents** (one per section/topic group): each gets its section's slide images, raw slide XML + theme XML, diagram assets (if any), and the relevant slice of the content + style plans. See `subagent-prompts.md` for grouping rules.
-   - **Holistic agent** (one): gets all slide thumbnails + full style plan. Checks cross-slide consistency only (motif, layout variety, color coherence, section transitions).
+3. **Spawn QA agents** — scale to the deck:
+   - **≤6 slides under review**: spawn a single `qa-reviewer` (section mode) covering all slides. It gets all slide images, raw XML + theme XML, diagram assets, and full plans. No holistic agent needed.
+   - **>6 slides under review**: spawn per-section agents + one holistic agent, all in parallel:
+     - **Section agents** (one per group): each gets its section's slide images, raw XML + theme XML, diagram assets (if any), and relevant plan excerpts. See `subagent-prompts.md` for grouping rules.
+     - **Holistic agent** (one): gets all slide thumbnails + full style plan. Checks cross-slide consistency only (motif, layout variety, color coherence, section transitions).
    - If a plan was skipped, use markitdown extraction or defaults instead
-4. **Merge** findings from all QA agents into a single review report
+4. **Merge** findings into a single review report
 5. **Fix** reported issues
-6. **Re-verify** affected slides (spawn section QA agent(s) for those slides)
+6. **Re-verify** affected slides (spawn QA agent(s) for those slides)
 7. **Save** findings to `.ppt/decks/<deck-name>/review-<n>.md`
+
+### How to group QA sections
+
+- **Plan mode**: use sections defined in the content plan (e.g., "Section I: slides 3-7"). Bookend slides (title, agenda, conclusion) form their own group.
+- **Direct mode / no plan**: use section divider slides as natural boundaries. If none exist, group by ~4-5 slides.
+- **Edit**: group changed slides by the section they belong to (from the content plan if available). Only review changed slides unless the edit was broad enough to warrant full-deck QA.
 
 ## References
 

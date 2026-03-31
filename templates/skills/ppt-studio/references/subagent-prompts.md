@@ -106,12 +106,12 @@ Include only the relevant section(s) — if the edit is content-only, omit the s
 
 ## QA Section Reviewer Prompt
 
-Use when spawning `qa-reviewer` agents in **section mode**. Spawn one per section/topic group. These run in parallel.
+Use when spawning `qa-reviewer` agents in **section mode**. For ≤6 slides: spawn one agent covering all slides (its within-group consistency checks naturally cover the full deck). For >6 slides: spawn one per section/topic group, running in parallel.
 
 ```
 You are reviewing slides {START} through {END} ("{SECTION_NAME}"). Assume there are issues — find them.
 
-**Mode: Section** — deep per-slide inspection of your assigned slides.
+**Mode: Section** — deep per-slide inspection + within-group consistency checks.
 
 ## Slide Images (your section only)
 {SECTION_SLIDE_IMAGE_LIST}
@@ -143,20 +143,26 @@ Read and analyze these images:
 Report ALL issues found.
 ```
 
-### How to group sections
+### When to split vs. use a single agent
 
-- **If content plan exists**: group by sections defined in the plan (e.g., "Section I: slides 3-7", "Section II: slides 8-11"). Title/agenda slides form their own group ("Bookends: slides 1-2").
-- **If no content plan**: group by ~4-5 slides each.
+- **≤6 slides under review**: spawn a single `qa-reviewer` in section mode covering all slides. No holistic agent needed.
+- **>6 slides under review**: spawn per-section agents + one holistic agent (all in parallel).
+
+### How to group sections (when splitting)
+
+- **Plan mode**: use sections defined in the content plan (e.g., "Section I: slides 3-7", "Section II: slides 8-11"). Bookend slides (title, agenda, conclusion) form their own group.
+- **Direct mode / no plan**: use section divider slides as natural boundaries. If none exist, group by ~4-5 slides.
+- **Edit**: group changed slides by the section they belong to (from the content plan if available). Only review changed slides unless the edit was broad enough to warrant full-deck QA.
 - Each section agent gets only its section's slice of the content plan, style plan, slide images, XML files, and diagram assets.
 
 ## QA Holistic Reviewer Prompt
 
-Use when spawning a `qa-reviewer` agent in **holistic mode**. Spawn exactly one, in parallel with the section agents.
+Use when spawning a `qa-reviewer` agent in **holistic mode** (>6 slides only). Spawn exactly one, in parallel with the section agents.
 
 ```
-Scan the full deck for cross-slide consistency issues. The section agents are handling per-slide inspection — your job is to catch what only a full-deck view reveals.
+Assess whether this deck reads as one cohesive presentation. The section agents are handling per-slide inspection and within-section consistency — your job is to catch what only a full-deck view reveals.
 
-**Mode: Holistic** — cross-slide consistency only. Do NOT do per-slide deep inspection.
+**Mode: Holistic** — overall cohesion and cross-slide consistency. Do NOT do per-slide deep inspection.
 
 ## All Slide Thumbnails
 {ALL_SLIDE_IMAGE_LIST}

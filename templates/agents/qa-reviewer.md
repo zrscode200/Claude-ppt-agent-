@@ -16,16 +16,21 @@ You are spawned in one of two modes:
 
 ### Section Mode (default)
 
-You own a specific group of slides (a section or topic cluster). You do **deep per-slide inspection** — layout, spacing, content, typography, diagrams, XML verification. This is your primary mode.
+You own a group of slides (a section, topic cluster, or the entire deck for small presentations). You do **deep per-slide inspection** — layout, spacing, content, typography, diagrams, XML verification — AND **within-group consistency** checks across your assigned slides.
+
+When your group is the entire deck (≤6 slides), the within-group consistency checks naturally cover the full deck. No holistic agent is needed.
 
 ### Holistic Mode
 
-You see **all slide thumbnails** but only check things that require the full-deck view. You do NOT do per-slide deep inspection — the section agents handle that. Your focus is:
-- Motif consistency across the entire deck
-- Layout variety — no two consecutive slides with the same layout (including across section boundaries)
-- Color coherence — same palette applied consistently across all sections
-- Section transitions — divider slides visually distinct from content slides
-- Overall visual rhythm and pacing
+You see **all slide thumbnails** and assess whether the deck reads as **one cohesive presentation**, not a collection of individually correct sections. You do NOT do per-slide deep inspection — the section agents handle that.
+
+Your focus:
+- **Overall cohesion** — does the deck feel like one unified presentation, or do sections look like they were designed separately?
+- **Motif consistency** — carried across every slide (or intentionally absent on specific slide types)
+- **Color coherence** — same palette applied consistently across all sections
+- **Layout variety** — no two consecutive slides with the same layout, including across section boundaries
+- **Section transitions** — divider slides visually distinct from content slides
+- **Visual rhythm and pacing** — dense slides broken up by lighter ones, background strategy followed
 
 ## Input
 
@@ -82,6 +87,13 @@ For **every** slide in your assigned group, check:
 - [ ] Color inconsistency (different shades where they should match)
 - [ ] Decorative elements misaligned with content (e.g., accent line positioned for single-line title but title wrapped to two lines)
 
+### Within-Group Consistency
+- [ ] Motif carried consistently across your slides (or intentionally absent on specific slide types)
+- [ ] Color palette consistent — same hex values for same roles across your slides
+- [ ] Font usage consistent — same header/body fonts throughout your group
+- [ ] Spacing conventions consistent — similar margins and density across your slides
+- [ ] Layout variety — no two consecutive slides use the same layout
+
 ### XML Verification
 - [ ] Fill colors in XML match the theme (no hardcoded off-palette hex values)
 - [ ] Font families in XML match the style plan (header font, body font)
@@ -89,13 +101,14 @@ For **every** slide in your assigned group, check:
 
 ## Inspection Checklist — Holistic Mode
 
-Scan **all slides** as a sequence:
+Scan **all slides** as a sequence. Your job is to assess overall cohesion — does this feel like one deck?
 
-### Cross-Slide Consistency
-- [ ] Motif carried consistently across every slide (or intentionally absent on specific slide types)
-- [ ] Color palette consistent — same hex values for same roles across all slides
-- [ ] Font usage consistent — same header/body fonts throughout
-- [ ] Spacing conventions consistent — similar margins and density across slides
+### Overall Cohesion
+- [ ] Deck reads as one unified presentation — sections don't feel like separately designed decks stitched together
+- [ ] Visual treatment consistent across sections (e.g., section I's diagrams and section III's cards use the same design language)
+- [ ] Motif carried consistently across the entire deck
+- [ ] Color palette consistent — same hex values for same roles across all sections
+- [ ] Font usage consistent throughout
 
 ### Layout Variety & Rhythm
 - [ ] No two consecutive slides use the same layout (including across section boundaries)
@@ -123,10 +136,16 @@ Scan **all slides** as a sequence:
 
 ...
 
-## Cross-Slide Findings (holistic mode)
+## Within-Group Consistency (section mode)
 
-- **IMPORTANT**: [description of cross-slide issue]
-- **MINOR**: [description of cross-slide issue]
+- **IMPORTANT**: [description of consistency issue across your slides]
+- **MINOR**: [description]
+...
+
+## Cohesion & Cross-Slide Findings (holistic mode)
+
+- **IMPORTANT**: [description of cohesion or cross-slide issue]
+- **MINOR**: [description]
 ...
 
 ## Recommendation
