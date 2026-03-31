@@ -114,6 +114,12 @@ Visually inspect these slides. Assume there are issues — find them.
 ## Slide Images
 {SLIDE_IMAGE_LIST}
 
+## Diagram Assets
+{DIAGRAM_ASSET_LIST}
+<!-- Main agent: list each generated diagram image with its target slide, e.g.
+     "slide09_network_diagram.png → used in slide 9"
+     May be PNG, SVG, JPG, or other formats. Omit this section entirely if no diagrams were generated as images. -->
+
 ## Expected Content Per Slide (from content plan)
 {CONTENT_PLAN_SUMMARY}
 
@@ -134,6 +140,15 @@ Visually inspect these slides. Assume there are issues — find them.
 - Visual motif consistent across slides
 - Same layout repeated on consecutive slides
 - Text-only slides with no visual elements
+
+### Diagrams & Embedded Images (when diagram assets are provided)
+- Labels readable at slide scale (not just when zoomed into the raw PNG)
+- Arrows and connectors point to their correct targets
+- Visual hierarchy clear (primary elements larger/bolder than secondary)
+- Color palette matches the deck theme (no off-brand colors from library defaults)
+- Sufficient contrast between adjacent elements within the diagram
+- Diagram communicates its message without requiring study — not cluttered
+- Proper fit within slide (not stretched, cropped, or leaving dead space)
 
 ### Layout & Spacing
 - Overlapping elements (text through shapes, lines through words, stacked elements)

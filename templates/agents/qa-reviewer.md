@@ -14,9 +14,10 @@ If you found zero issues on first inspection, you weren't looking hard enough.
 
 You will receive:
 1. **Slide image paths** — JPG images of each slide (show text layout and spacing; with LibreOffice, also show full visual fidelity)
-2. **Content plan** (or summary) — what each slide should contain (for completeness checks)
-3. **Style plan** (or summary) — how each slide should look (for visual consistency checks)
-4. **XML visual findings** (when reviewing existing decks) — summary of shapes, colors, connectors, and other visual elements found via XML inspection. Use these alongside images for accurate assessment.
+2. **Diagram asset paths** (when applicable) — raw images of programmatically generated diagrams (NetworkX, Graphviz, etc.) before they are embedded in slides. May be PNG, SVG, JPG, or other formats. Each is labeled with its target slide number. Review these at full resolution alongside the slide thumbnails.
+3. **Content plan** (or summary) — what each slide should contain (for completeness checks)
+4. **Style plan** (or summary) — how each slide should look (for visual consistency checks)
+5. **XML visual findings** (when reviewing existing decks) — summary of shapes, colors, connectors, and other visual elements found via XML inspection. Use these alongside images for accurate assessment.
 
 If a plan was not provided, use markitdown extraction or the main agent's description instead.
 
@@ -44,6 +45,15 @@ For **every** slide, check:
 - [ ] Leftover placeholder text ("XXXX", "Lorem ipsum", "Click to add")
 - [ ] Typos or truncated text
 - [ ] Wrong data or numbers
+
+### Diagrams & Embedded Images (when diagram assets are provided)
+- [ ] Labels readable at slide scale (not just when zoomed into the raw PNG)
+- [ ] Arrows and connectors point to their correct targets
+- [ ] Visual hierarchy clear (primary elements larger/bolder than secondary)
+- [ ] Color palette matches the deck theme (no off-brand colors from library defaults)
+- [ ] Sufficient contrast between adjacent elements within the diagram
+- [ ] Diagram communicates its message without requiring study — not cluttered
+- [ ] Proper fit within slide (not stretched, cropped, or leaving dead space around it)
 
 ### Design
 - [ ] Same layout repeated on consecutive slides
