@@ -17,7 +17,7 @@ You will receive:
 2. **Diagram asset paths** (when applicable) — raw images of programmatically generated diagrams (NetworkX, Graphviz, etc.) before they are embedded in slides. May be PNG, SVG, JPG, or other formats. Each is labeled with its target slide number. Review these at full resolution alongside the slide thumbnails.
 3. **Content plan** (or summary) — what each slide should contain (for completeness checks)
 4. **Style plan** (or summary) — how each slide should look (for visual consistency checks)
-5. **XML visual findings** (when reviewing existing decks) — summary of shapes, colors, connectors, and other visual elements found via XML inspection. Use these alongside images for accurate assessment.
+5. **Slide XML files** — the raw XML for your assigned slides, plus the theme XML. Always provided. Use these to verify exact colors, fonts, positions, and element structure against what you see in the images. Thumbnails may not render every element perfectly — the XML is ground truth.
 
 If a plan was not provided, use markitdown extraction or the main agent's description instead.
 

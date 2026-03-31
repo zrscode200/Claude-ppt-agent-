@@ -149,18 +149,20 @@ For improving existing decks with >8 slides to edit:
 
 ### QA Phase (Review as sub-action)
 
-Always use a sub-agent for visual QA:
+Always use sub-agents for visual QA:
 
-1. **Convert** to images: `python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/`
-2. **Spawn `qa-reviewer` agent** with:
+1. **Unpack** (if not already unpacked): `python scripts/unpack.py <deck>.pptx unpacked/`
+2. **Convert** to images: `python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/`
+3. **Spawn `qa-reviewer` agent(s)** with:
    - Slide image paths
+   - Raw slide XML files + theme XML (from unpacked/) — the reviewer uses these as ground truth
+   - Diagram asset images (if any were generated programmatically)
    - **Content plan** for completeness checks (expected content per slide)
    - **Style plan** for visual consistency checks (theme, layouts, motif)
-   - The QA checklist (overlaps, overflow, contrast, spacing, alignment)
    - If a plan was skipped, use markitdown extraction or defaults instead
-3. **Fix** reported issues
-4. **Re-verify** affected slides (spawn another QA agent if needed)
-5. **Save** findings to `.ppt/decks/<deck-name>/review-<n>.md`
+4. **Fix** reported issues
+5. **Re-verify** affected slides (spawn another QA agent if needed)
+6. **Save** findings to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ## References
 

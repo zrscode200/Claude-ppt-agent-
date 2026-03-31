@@ -120,6 +120,14 @@ Visually inspect these slides. Assume there are issues — find them.
      "slide09_network_diagram.png → used in slide 9"
      May be PNG, SVG, JPG, or other formats. Omit this section entirely if no diagrams were generated as images. -->
 
+## Slide XML + Theme
+{SLIDE_XML_PATHS}
+<!-- Main agent: always provide the raw slide XML files for the assigned slides,
+     plus the theme XML (ppt/theme/theme1.xml). For create: unpack the freshly
+     built .pptx. For edit: use the already-unpacked XML from the edit phase.
+     The qa-reviewer uses these as ground truth to verify colors, fonts,
+     positions, and element structure against what it sees in the images. -->
+
 ## Expected Content Per Slide (from content plan)
 {CONTENT_PLAN_SUMMARY}
 
