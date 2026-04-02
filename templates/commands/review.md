@@ -43,11 +43,12 @@ Default to **full** if ambiguous.
    - With LibreOffice installed, images also show full visual fidelity (shapes, colors, etc.)
 4. **Analyze** — combine sources:
    - Content (from markitdown): messages, data accuracy, completeness, flow
-   - For style scope: spawn QA agents — scale to the deck:
+   - For style scope: assign QA report file paths, then spawn QA agents — each writes its report to its file and returns only a summary:
      - **≤6 slides**: single `qa-reviewer` (section mode) with all slide images, raw XML + theme XML from `unpacked/`, and content summary from markitdown
      - **>6 slides**: per-section agents (each gets its section's images, XML, content summary) + one holistic agent (all thumbnails, cross-slide consistency)
    - For content-only scope: main agent reviews content structure and flow directly
-5. **Write review report**
+5. **Read QA report files** for sections with issues, based on returned summaries
+6. **Write review report**
    - Merge QA agent findings (if style scope) with main agent's content analysis
    - If LibreOffice is not installed, note that full visual composition rendering is available by installing it
 
@@ -59,8 +60,9 @@ Default to **full** if ambiguous.
 
 ### For slide images
 
-1. **Spawn QA agents** — if ≤6 images, single agent; if >6, section agents (grouped by ~4-5 slides) + holistic agent
-2. **Write review report** from merged findings
+1. **Spawn QA agents** (each writes report to assigned file, returns summary) — if ≤6 images, single agent; if >6, section agents (grouped by ~4-5 slides) + holistic agent
+2. **Read QA report files**, merge findings
+3. **Write review report**
 
 ## Review Report Format
 

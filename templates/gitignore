@@ -4,6 +4,9 @@ node_modules/
 output/
 .ppt/logs/
 .ppt/decks/*/v*/slides/
+.ppt/decks/*/v*/slides_*.js
+.ppt/decks/*/v*/build.js
+.ppt/decks/*/v*/qa-*.md
 *.pdf
 __pycache__/
 *.py[codz]

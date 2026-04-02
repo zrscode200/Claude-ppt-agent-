@@ -71,9 +71,10 @@ Same iteration flow → `style-plan-approved.md`.
 2. Create deck folder: `.ppt/decks/<deck-name>/`
 3. Create version folder: `v1/` (or next version if deck exists)
 4. Determine method: PptxGenJS (default) or template-based
-5. If >12 slides: spawn `slide-builder` sub-agents — split by sub-topic/section, each agent gets content plan + style plan + theme JSON for their section
-6. If <=12 slides: build in a single PptxGenJS script
-7. Output `.pptx` to the version folder
+5. If >12 slides: assign output file paths (e.g., `v<n>/slides_1_4.js`), spawn `slide-builder` sub-agents — each writes its code to its assigned file and returns a confirmation. After all confirm, verify files exist, then write `build.js` using the assembly template (see `subagent-prompts.md`).
+6. If <=12 slides: build in a single PptxGenJS script (no sub-agents)
+7. Run `node build.js` (or the single script) — console output shows per-section pass/fail
+8. Output `.pptx` to the version folder
 
 ### QA Phase — MANDATORY
 
@@ -84,13 +85,14 @@ Same iteration flow → `style-plan-approved.md`.
    ```
    python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/
    ```
-3. Spawn QA agents — scale to the deck:
+3. Assign QA report file paths (e.g., `v<n>/qa-section-1-6.md`, `v<n>/qa-holistic.md`)
+4. Spawn QA agents — each writes its report to its assigned file and returns only a summary line:
    - **≤6 slides**: single `qa-reviewer` (section mode) covering all slides with all images, XML, diagrams, and plans
    - **>6 slides**: per-section agents (one per content plan section, or grouped by section dividers in direct mode) + one holistic agent. Each section agent gets its slice of images, XML, diagrams, and plans. Holistic agent gets all thumbnails + full style plan.
-4. Merge findings from all QA agents
-5. Fix reported issues
-6. Re-generate images for affected slides and re-verify — at least one fix-and-verify cycle
-7. Save review report to `.ppt/decks/<deck-name>/review-<n>.md`
+5. Read QA report files for sections with issues, merge findings
+6. Fix reported issues
+7. Re-generate images for affected slides and re-verify — at least one fix-and-verify cycle (re-verification overwrites intermediate QA files)
+8. Save merged review report to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ### Delivery
 

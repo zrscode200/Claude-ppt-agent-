@@ -14,11 +14,11 @@ If a plan was not provided, the main agent will pass defaults instead.
 
 ## Output
 
-Write a JavaScript function named `buildSlides_<startIndex>_<endIndex>(pres, theme)` that adds your assigned slides to the `pres` object.
+Write a JavaScript function named `buildSlides_<startIndex>_<endIndex>(pres, theme)` to the **output file path** given in your prompt. Export it for use by the assembly script.
 
-Example:
+Example file (`slides_3_5.js`):
 ```javascript
-function buildSlides_3_5(pres, theme) {
+async function buildSlides_3_5(pres, theme) {
   // Slide 3: Revenue Overview
   let slide3 = pres.addSlide();
   slide3.background = { color: theme.colors.bg_light };
@@ -27,7 +27,11 @@ function buildSlides_3_5(pres, theme) {
   // Slide 4: ...
   // Slide 5: ...
 }
+
+module.exports = { buildSlides_3_5 };
 ```
+
+**Return ONLY** a one-line confirmation: `Wrote buildSlides_N_M to <path> (N slides)`. Do NOT include the code in your response — the file you wrote is the deliverable.
 
 ## Rules
 
@@ -69,8 +73,8 @@ theme = {
 
 ## Do NOT
 
-- Do not create the `pres` object or call `writeFile` — the main script handles that
-- Do not import pptxgenjs — it's already imported in the main script
+- Do not create the `pres` object or call `writeFile` — the assembly script handles that
+- Do not import pptxgenjs — it is provided via the `pres` argument
 - Do not hardcode colors — always use `theme.colors.*`
 - Do not use `lineSpacing` with bullets — use `paraSpaceAfter` instead
 - Do not use `ROUNDED_RECTANGLE` with accent borders — they won't cover rounded corners

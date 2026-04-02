@@ -54,20 +54,25 @@ You are a slide builder. Build slides {START} through {END} for the "{DECK_NAME}
 ## Theme JSON
 {THEME_JSON}
 
+## Output File
+Write your function to: `{OUTPUT_FILE_PATH}`
+
 ## Instructions
 
-1. Write a JavaScript function `buildSlides_{START}_{END}(pres, theme)` that adds your slides to the `pres` object
-2. Use the **content plan** for what goes on each slide (messages, data, structure)
-3. Use the **style plan** for how each slide looks (layouts, visual elements, motif)
-4. Use the theme object for ALL colors and fonts — never hardcode hex values
-5. Follow the PptxGenJS API — no "#" prefix on colors, use `breakLine: true`, use `bullet: true`
-6. Never reuse option objects (PptxGenJS mutates them) — use factory functions
-7. Every slide MUST have a visual element (shape, chart, icon)
-8. Vary layouts — don't repeat the same layout on consecutive slides
+1. Write an async JavaScript function `buildSlides_{START}_{END}(pres, theme)` that adds your slides to the `pres` object
+2. Export it: `module.exports = { buildSlides_{START}_{END} };`
+3. Use the **content plan** for what goes on each slide (messages, data, structure)
+4. Use the **style plan** for how each slide looks (layouts, visual elements, motif)
+5. Use the theme object for ALL colors and fonts — never hardcode hex values
+6. Follow the PptxGenJS API — no "#" prefix on colors, use `breakLine: true`, use `bullet: true`
+7. Never reuse option objects (PptxGenJS mutates them) — use factory functions
+8. Every slide MUST have a visual element (shape, chart, icon)
+9. Vary layouts — don't repeat the same layout on consecutive slides
 
 Read the agent definition at .claude/agents/slide-builder.md for full rules.
 
-Return ONLY the JavaScript function. Do not create the pres object or call writeFile.
+Write the function to the output file. Reply with ONLY: "Wrote buildSlides_{START}_{END} to {OUTPUT_FILE_PATH} (N slides)"
+Do NOT include code in your response.
 ```
 
 If a plan was skipped, replace its section with the defaults being used (e.g., default theme, agent-chosen layouts).
@@ -113,6 +118,9 @@ You are reviewing slides {START} through {END} ("{SECTION_NAME}"). Assume there 
 
 **Mode: Section** — deep per-slide inspection + within-group consistency checks.
 
+## Output File
+Write your full report to: `{OUTPUT_FILE_PATH}`
+
 ## Slide Images (your section only)
 {SECTION_SLIDE_IMAGE_LIST}
 
@@ -140,7 +148,8 @@ For each slide in your section, list ALL issues found, including minor ones. Rep
 Read and analyze these images:
 {SECTION_IMAGE_PATHS_WITH_DESCRIPTIONS}
 
-Report ALL issues found.
+Write your full report to the output file. Reply with ONLY your summary: "Found N issues: X critical, Y important, Z minor. [PASS | PASS WITH FIXES | FAIL]"
+Do NOT include the full report in your response.
 ```
 
 ### When to split vs. use a single agent
@@ -164,6 +173,9 @@ Assess whether this deck reads as one cohesive presentation. The section agents 
 
 **Mode: Holistic** — overall cohesion and cross-slide consistency. Do NOT do per-slide deep inspection.
 
+## Output File
+Write your full report to: `{OUTPUT_FILE_PATH}`
+
 ## All Slide Thumbnails
 {ALL_SLIDE_IMAGE_LIST}
 
@@ -175,7 +187,8 @@ Read the agent definition at .claude/agents/qa-reviewer.md for the full holistic
 Read and analyze these images:
 {ALL_IMAGE_PATHS_WITH_DESCRIPTIONS}
 
-Report ALL cross-slide issues found.
+Write your full report to the output file. Reply with ONLY your summary: "Found N issues: X critical, Y important, Z minor. [PASS | PASS WITH FIXES | FAIL]"
+Do NOT include the full report in your response.
 ```
 
 ### Notes for both prompts
@@ -184,30 +197,61 @@ If a plan was skipped, replace its section with markitdown extraction or default
 
 ## Assembly Script Template
 
-Template for the main PptxGenJS wrapper that assembles sub-agent output.
+Template for the main `build.js` wrapper that assembles sub-agent section files via `require()`. Each section file is written by a `slide-builder` sub-agent. The main agent writes this wrapper after all builders confirm, then runs `node build.js`.
 
 ```javascript
 const pptxgen = require("pptxgenjs");
+
+// Import section files (written by slide-builder sub-agents)
+const { buildSlides_{RANGE_1} } = require("./{SECTION_FILE_1}");
+const { buildSlides_{RANGE_2} } = require("./{SECTION_FILE_2}");
+// ... one require() per section file
 
 // Theme
 const theme = {THEME_JSON};
 
 // Create presentation
-let pres = new pptxgen();
+const pres = new pptxgen();
 pres.layout = "LAYOUT_16x9";
 pres.author = "{AUTHOR}";
 pres.title = "{TITLE}";
 
-// === Slide builder functions (from sub-agents) ===
+// Sections — ordered list with expected slide counts
+const sections = [
+  { fn: buildSlides_{RANGE_1}, file: "{SECTION_FILE_1}", expected: {COUNT_1} },
+  { fn: buildSlides_{RANGE_2}, file: "{SECTION_FILE_2}", expected: {COUNT_2} },
+  // ... one entry per section
+];
 
-{BUILDER_FUNCTIONS}
+async function main() {
+  for (const { fn, file, expected } of sections) {
+    const before = pres.slides.length;
+    try {
+      await fn(pres, theme);
+      const added = pres.slides.length - before;
+      if (added !== expected) {
+        console.warn(`WARNING: ${file} expected ${expected} slides, got ${added}`);
+      }
+      console.log(`${file}: OK (${added} slides)`);
+    } catch (e) {
+      console.error(`FAILED in ${file} (after slide ${before}):`);
+      console.error(e.message);
+      process.exit(1);
+    }
+  }
 
-// === Build all slides in order ===
+  console.log(`Total: ${pres.slides.length} slides`);
+  await pres.writeFile({ fileName: "{OUTPUT_PATH}" });
+  console.log("Created: {OUTPUT_PATH}");
+}
 
-{BUILDER_CALLS}
-
-// === Write output ===
-pres.writeFile({ fileName: "{OUTPUT_PATH}" })
-  .then(() => console.log("Created: {OUTPUT_PATH}"))
-  .catch(err => console.error("Error:", err));
+main();
 ```
+
+**Notes:**
+- Each `require()` loads a section file that exports one `buildSlides_N_M(pres, theme)` function
+- Sections run sequentially in slide order — each adds slides to the shared `pres` object
+- Per-section try/catch isolates errors to the exact file and slide position
+- Slide count validation catches mismatches early (builder added fewer/more slides than expected)
+- `process.exit(1)` on first failure — fix one section at a time
+- Always run as a fresh `node build.js` process (Node's `require()` cache is per-process)

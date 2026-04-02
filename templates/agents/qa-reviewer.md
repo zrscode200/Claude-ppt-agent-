@@ -47,6 +47,10 @@ Your focus:
 
 If a plan was not provided, use markitdown extraction or the main agent's description instead.
 
+### Output Destination
+
+Write your full report to the **output file path** given in your prompt. **Return ONLY** a one-line summary: `Found N issues: X critical, Y important, Z minor. [PASS | PASS WITH FIXES | FAIL]`. Do NOT return the full report in your response — the file you wrote is the deliverable.
+
 ## Inspection Checklist — Section Mode
 
 For **every** slide in your assigned group, check:

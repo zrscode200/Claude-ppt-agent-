@@ -116,9 +116,14 @@ For edits in plan mode: `edit-content-plan-draft-<n>.md`, `edit-style-plan-draft
       edit-style-plan-draft-1.md     # Style changes for an edit
       v1/                            # Edition 1
         <deck-name>.pptx             # The presentation
+        build.js                     # Assembly wrapper (>12 slides)
+        slides_1_4.js                # Builder output (>12 slides)
+        slides_5_9.js                # Builder output (>12 slides)
         slides/                      # Slide images
           slide-01.jpg
           slide-02.jpg
+        qa-section-1-4.md            # QA section report (intermediate)
+        qa-holistic.md               # QA holistic report (intermediate)
       v2/                            # Edition 2 (after improvements)
         <deck-name>.pptx
         slides/
@@ -171,15 +176,19 @@ Theme structure:
 - **Build / Edit**: group slides by sub-topic or section (not arbitrarily) — each agent should own a coherent group
 - Each build/edit sub-agent gets: **content plan** (what to build) + **style plan** (how it looks) + API reference
 - If a plan was skipped, pass the defaults the agent is using instead
-- For PptxGenJS: each sub-agent writes a function that adds slides to a `pres` object
+- For PptxGenJS: each sub-agent writes its function to an assigned file (e.g., `slides_3_7.js`) and returns only a one-line confirmation
 - For XML editing: each sub-agent edits its assigned slide files directly
-- **QA**: for ≤6 slides, single agent gets everything. For >6 slides, group by content plan sections (or section divider slides if no plan, or ~4-5 slides as fallback). Each section QA agent gets its slides' images, raw XML + theme XML, diagram assets, and relevant plan excerpts. The holistic QA agent gets all thumbnails + full style plan. All QA agents run in parallel.
+- **QA**: for ≤6 slides, single agent gets everything. For >6 slides, group by content plan sections (or section divider slides if no plan, or ~4-5 slides as fallback). Each QA agent writes its report to an assigned file and returns only a summary line. The main agent reads report files on demand. All QA agents run in parallel.
 
-### Assembly (PptxGenJS)
-1. Main agent writes the wrapper (imports, theme constants, pres init)
-2. Sub-agents each return slide-building code
-3. Main agent assembles into one script, runs it
-4. Output goes to the deck's version folder
+### Assembly (PptxGenJS, >12 slides)
+1. Main agent assigns output file paths to each `slide-builder` sub-agent
+2. Sub-agents write their code to files, return one-line confirmations
+3. Main agent verifies files exist, then writes `build.js`: `require()` imports for each section file, theme constants, per-section try/catch with slide count validation
+4. Main agent runs `node build.js` — console output shows per-section pass/fail
+5. On failure: console names the exact file and slide position; main agent reads that file to fix
+6. Output goes to the deck's version folder
+
+For ≤12 slides: main agent writes a single script directly (no sub-agents, no assembly template).
 
 ## Plan Formats
 
@@ -257,7 +266,9 @@ See `.claude/skills/ppt-studio/references/design-guide.md` for full design refer
 - **No default blue** — pick colors that reflect the topic
 - **No repeated layouts** — vary across slides
 - **Visual QA is mandatory** — NEVER go directly from build to delivery. Always run QA between build and delivery.
-- **QA uses sub-agents** — fresh eyes catch what you miss. Spawn per-section `qa-reviewer` agents + one holistic `qa-reviewer` agent.
+- **QA uses sub-agents** — fresh eyes catch what you miss. Spawn per-section `qa-reviewer` agents + one holistic `qa-reviewer` agent. Each writes its report to a file and returns only a summary — read report files on demand.
+- **Sub-agents write to files** — builders write code to section files, QA agents write reports to report files. They return only one-line confirmations. This preserves main agent context for the fix-and-verify cycle.
+- **Build scripts use error isolation** — per-section try/catch and slide count validation catch cross-section issues without requiring the main agent to hold all code in context.
 - **Fix-and-verify loop** — one fix often creates another problem; re-verify affected slides
 - **At least one fix-and-verify cycle** before declaring success — zero-issue first pass means you weren't looking hard enough
 - **Fresh eyes on every analysis** — do not read previous review reports (`review-*.md`) when analyzing a deck. Always work from primary sources (thumbnails, markitdown, XML). Only reference a previous review if the user explicitly points to it.

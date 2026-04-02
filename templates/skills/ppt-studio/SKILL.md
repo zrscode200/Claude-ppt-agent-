@@ -124,16 +124,19 @@ Use the `style-extractor` agent whenever the agent needs to understand a deck's 
 For decks with >12 slides:
 
 1. **Divide slides** by sub-topic or section — each agent owns a coherent group
-2. **Spawn `slide-builder` agents** — each gets:
+2. **Assign output file paths** — one per section (e.g., `v<n>/slides_1_4.js`, `v<n>/slides_5_9.js`)
+3. **Spawn `slide-builder` agents** — each gets:
    - Their assigned slides from the **content plan** (what to build)
    - The **style plan** or theme JSON (how it looks)
    - PptxGenJS API reference (`.claude/skills/ppt-studio/references/pptxgenjs-guide.md`)
-   - Instruction: "Write a `buildSlides(pres, theme)` function"
+   - Output file path — the agent writes its code to this file and returns only a confirmation
    - If a plan was skipped, pass the defaults being used instead
-3. **Assemble** — main agent creates wrapper script, inlines sub-agent functions, runs it
-4. **Output** goes to `.ppt/decks/<name>/v<n>/<name>.pptx`
+4. **Verify** — confirm each section file exists after builders return
+5. **Assemble** — main agent writes `build.js` using the assembly template from `subagent-prompts.md`: `require()` imports for each section file, theme constants, per-section error isolation with try/catch, and slide count validation
+6. **Build** — run `node build.js` and read console output for per-section pass/fail. On failure, the console names the exact file and slide position.
+7. **Output** goes to `.ppt/decks/<name>/v<n>/<name>.pptx`
 
-For decks with ≤12 slides: build directly in a single PptxGenJS script.
+For decks with ≤12 slides: build directly in a single PptxGenJS script (no sub-agents, no assembly template).
 
 ### Edit Phase (XML editing)
 
@@ -153,16 +156,19 @@ Always use sub-agents for visual QA:
 
 1. **Unpack** (if not already unpacked): `python scripts/unpack.py <deck>.pptx unpacked/`
 2. **Convert** to images: `python scripts/thumbnail.py <deck>.pptx v<n>/slides/thumbnails --slides-dir v<n>/slides/`
-3. **Spawn QA agents** — scale to the deck:
-   - **≤6 slides under review**: spawn a single `qa-reviewer` (section mode) covering all slides. It gets all slide images, raw XML + theme XML, diagram assets, and full plans. No holistic agent needed.
+3. **Assign QA report file paths** — one per QA agent (e.g., `v<n>/qa-section-1-6.md`, `v<n>/qa-holistic.md`)
+4. **Spawn QA agents** — scale to the deck:
+   - **≤6 slides under review**: spawn a single `qa-reviewer` (section mode) covering all slides. It gets all slide images, raw XML + theme XML, diagram assets, full plans, and an output file path. No holistic agent needed.
    - **>6 slides under review**: spawn per-section agents + one holistic agent, all in parallel:
-     - **Section agents** (one per group): each gets its section's slide images, raw XML + theme XML, diagram assets (if any), and relevant plan excerpts. See `subagent-prompts.md` for grouping rules.
-     - **Holistic agent** (one): gets all slide thumbnails + full style plan. Checks cross-slide consistency only (motif, layout variety, color coherence, section transitions).
+     - **Section agents** (one per group): each gets its section's slide images, raw XML + theme XML, diagram assets (if any), relevant plan excerpts, and an output file path. See `subagent-prompts.md` for grouping rules.
+     - **Holistic agent** (one): gets all slide thumbnails + full style plan + output file path. Checks cross-slide consistency only.
    - If a plan was skipped, use markitdown extraction or defaults instead
-4. **Merge** findings into a single review report
-5. **Fix** reported issues
-6. **Re-verify** affected slides (spawn QA agent(s) for those slides)
-7. **Save** findings to `.ppt/decks/<deck-name>/review-<n>.md`
+   - Each agent writes its full report to its output file and returns only a summary line
+5. **Read QA reports** — read the report files for sections with issues (based on the returned summaries)
+6. **Merge** findings into a single review report
+7. **Fix** reported issues
+8. **Re-verify** affected slides (spawn QA agent(s) — re-verification overwrites intermediate QA files)
+9. **Save** merged findings to `.ppt/decks/<deck-name>/review-<n>.md`
 
 ### How to group QA sections
 
