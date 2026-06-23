@@ -50,6 +50,7 @@ REQUIRED_FILES = [
     "scripts/add_slide.py",
     "scripts/thumbnail.py",
     "scripts/soffice.py",
+    "docs/product-overview.md",
 ]
 
 SYSTEM = platform.system()  # 'Darwin', 'Linux', 'Windows'
@@ -66,6 +67,7 @@ DIRECTORIES = [
     "templates",
     "assets",
     "output",
+    "docs",
 ]
 
 GITKEEP_DIRS = ["templates", "assets", "output", ".ppt/decks", ".ppt/logs"]
@@ -225,6 +227,10 @@ def copy_system_files(target: Path, copy_fn) -> None:
     # Themes
     for f in sorted((TEMPLATES / "themes").glob("*.json")):
         copy_fn(f, target / "themes" / f.name)
+
+    # Docs
+    for f in sorted((TEMPLATES / "docs").glob("*.md")):
+        copy_fn(f, target / "docs" / f.name)
 
     # Package files
     copy_fn(TEMPLATES / "package.json", target / "package.json")
@@ -421,7 +427,7 @@ def main():
 System files (refreshed with --update):
   CLAUDE.md, .claude/commands/*, .claude/skills/*, .claude/agents/*,
   .claude/hooks/*, .claude/settings.json, scripts/*, themes/*,
-  package.json, requirements.txt
+  docs/*, package.json, requirements.txt
 
 User files (never overwritten):
   .ppt/config.md, .claude/settings.local.json, .ppt/decks/*

@@ -2,6 +2,8 @@
 
 A bootstrap toolkit that turns any directory into a Claude Code-powered presentation creation workspace.
 
+For a conceptual walkthrough of what the agent does and how it works — plan-then-build, sub-agents, visual QA, version trail — see [`templates/docs/product-overview.md`](templates/docs/product-overview.md). It's also stamped into every target repo at `docs/product-overview.md`.
+
 ## Quick Start
 
 ```bash
@@ -39,6 +41,7 @@ The bootstrap script stamps the target directory with:
 - **2 hooks** — Session context injection (active decks, current phase)
 - **6 utility scripts** — Unpack, pack, clean, add slide, thumbnails, PDF conversion
 - **6 themes** — Curated color/font palettes
+- **Product overview doc** — Conceptual walkthrough at `docs/product-overview.md`
 - **Python venv** — With markitdown, python-pptx, Pillow, defusedxml
 - **npm packages** — pptxgenjs, react-icons, sharp
 
