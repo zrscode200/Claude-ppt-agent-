@@ -1,3 +1,0 @@
-markitdown[pptx]
-Pillow
-defusedxml

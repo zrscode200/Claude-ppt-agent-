@@ -1,16 +1,20 @@
 # PPT Studio
 
-A bootstrap toolkit that turns any directory into a Claude Code-powered presentation creation workspace.
+A bootstrap toolkit that turns any directory into a presentation creation workspace for **Claude Code** or **OpenCode**.
 
-For a conceptual walkthrough of what the agent does and how it works — plan-then-build, sub-agents, visual QA, version trail — see [`templates/docs/product-overview.md`](templates/docs/product-overview.md). It's also stamped into every target repo at `docs/product-overview.md`.
+For a conceptual walkthrough of what the agent does and how it works — plan-then-build, sub-agents, visual QA, version trail — see [`core/docs/product-overview.md`](core/docs/product-overview.md). It's also stamped into every target repo at `docs/product-overview.md`.
 
 ## Quick Start
 
 ```bash
-python bootstrap/init-ppt-studio.py /path/to/your/project
+# Claude Code (default)
+python3.12 bootstrap/init-ppt-studio.py /path/to/your/project
+
+# OpenCode
+python3.12 bootstrap/init-ppt-studio.py /path/to/your/project --runtime opencode
 ```
 
-Then open Claude Code in the target directory and use:
+Then open the chosen runtime in the target directory and use:
 
 ### Fundamental Commands
 
@@ -34,26 +38,42 @@ Or just describe what you want — the skill routes your intent to the right com
 
 The bootstrap script stamps the target directory with:
 
-- **CLAUDE.md** — Agent operating manual (primes Claude as a PPT specialist)
+- **Instruction doc** — `CLAUDE.md` (Claude Code) or `AGENTS.md` (OpenCode); the agent operating manual
 - **6 slash commands** — 3 fundamental actions + 3 composed workflows
-- **4 agent definitions** — Sub-agents for style extraction, slide building, editing, and QA
+- **4 sub-agents** — style extraction, slide building, editing, and QA
 - **1 skill** — Intent routing (auto-triggers on PPT-related requests)
-- **2 hooks** — Session context injection (active decks, current phase)
 - **6 utility scripts** — Unpack, pack, clean, add slide, thumbnails, PDF conversion
 - **6 themes** — Curated color/font palettes
 - **Product overview doc** — Conceptual walkthrough at `docs/product-overview.md`
 - **Python venv** — With markitdown, python-pptx, Pillow, defusedxml
 - **npm packages** — pptxgenjs, react-icons, sharp
 
+Runtime-specific wiring:
+
+- **Claude Code:** `.claude/{commands,skills,agents,hooks}`, `.claude/settings.json`, and 2 session hooks (active-deck/phase context injection).
+- **OpenCode:** `.opencode/{command,agent,skills}`, `opencode.json`, and a `/status` command (OpenCode has no session-start hook, so deck/phase status is explicit).
+
 ## Updating
 
 To refresh system files without touching your work:
 
 ```bash
-python bootstrap/init-ppt-studio.py /path/to/your/project --update
+python3.12 bootstrap/init-ppt-studio.py /path/to/your/project --update
+# add --runtime opencode for an OpenCode workspace
 ```
 
-This updates scripts, commands, skills, agents, hooks, and themes. Your plans, decks, config, and custom templates are preserved.
+This updates the instruction doc, commands, skills, agents, scripts, themes, and (Claude) hooks. Your plans, decks, config, custom templates, and `opencode.json` are preserved.
+
+## For Maintainers — the render pipeline
+
+System files are authored once in `core/` (runtime-neutral, with `{{TOKENS}}`) plus per-runtime mechanics in `adapters/{claude,opencode}/`. A generator renders both into checked-in trees:
+
+```bash
+python3.12 scripts/render_templates.py          # rebuild generated/{claude,opencode}/
+python3.12 scripts/render_templates.py --check  # verify generated/ is fresh (CI gate)
+```
+
+The installer copies from `generated/<runtime>/`; it never renders. After editing `core/` or `adapters/`, re-render and commit `generated/`. The Claude render is the identity baseline, so existing Claude output never drifts.
 
 ## Requirements
 

@@ -11,10 +11,9 @@ Usage:
     python3.12 scripts/render_templates.py --runtime claude
     python3.12 scripts/render_templates.py --check    # verify generated/ is fresh
 
-The Claude render is the identity baseline: with the default (empty) token map
-its output is byte-identical to the legacy ``templates/`` tree. Per-runtime
-token substitution is layered on in later waves; the Claude token values always
-reproduce the canonical Claude dialect so existing output never drifts.
+The Claude render is the identity baseline: its token values reproduce the
+canonical Claude dialect, so generated/claude/ matches the original Claude
+output and existing Claude workspaces never drift when re-rendered.
 """
 
 from __future__ import annotations
@@ -43,7 +42,7 @@ RUNTIMES = ("claude", "opencode")
 RUNTIME_CONFIG = {
     # Claude is the identity baseline: each token maps back to the canonical
     # Claude-dialect string, so generated/claude/ stays byte-identical to the
-    # legacy templates/ output even though core/ now carries {{TOKENS}}.
+    # original Claude output even though core/ now carries {{TOKENS}}.
     "claude": {
         "instruction_doc": "CLAUDE.md",
         "command_dir": ".claude/commands",
