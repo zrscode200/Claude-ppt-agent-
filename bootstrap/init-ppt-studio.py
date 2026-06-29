@@ -30,36 +30,28 @@ DEFAULT_RUNTIME = "claude"
 def runtime_root(runtime: str) -> Path:
     return GENERATED / runtime
 
-# Required files validated before copy, expressed relative to the rendered
-# generated/<runtime>/ tree (which already mirrors the final stamped layout).
-REQUIRED_FILES = [
-    "CLAUDE.md",
-    ".claude/settings.json",
-    "config.md",
-    "package.json",
-    "requirements.txt",
-    "gitignore",
-    ".claude/commands/review.md",
-    ".claude/commands/create.md",
-    ".claude/commands/edit.md",
-    ".claude/commands/create-deck.md",
-    ".claude/commands/improve-deck.md",
-    ".claude/commands/deck-from-doc.md",
-    ".claude/skills/ppt-studio/SKILL.md",
-    ".claude/agents/style-extractor.md",
-    ".claude/agents/slide-builder.md",
-    ".claude/agents/slide-editor.md",
-    ".claude/agents/qa-reviewer.md",
-    ".claude/hooks/setup.py",
-    ".claude/hooks/session_start.py",
-    "scripts/unpack.py",
-    "scripts/pack.py",
-    "scripts/clean.py",
-    "scripts/add_slide.py",
-    "scripts/thumbnail.py",
-    "scripts/soffice.py",
-    "docs/product-overview.md",
-]
+# Runtime-relative files that must be present in a rendered tree for it to be a
+# valid stamp source. Kept minimal and runtime-agnostic: the instruction doc and
+# a couple of always-present neutral files. The full per-runtime layout is
+# whatever the renderer produced under generated/<runtime>/.
+def required_files(runtime: str) -> list[str]:
+    return [
+        RUNTIME_INSTRUCTION_DOC[runtime],
+        "config.md",
+        "package.json",
+        "requirements.txt",
+        "gitignore",
+        "scripts/thumbnail.py",
+        "docs/product-overview.md",
+    ]
+
+# Per-runtime instruction-doc filename at the generated-tree root.
+RUNTIME_INSTRUCTION_DOC = {
+    "claude": "CLAUDE.md",
+    "opencode": "AGENTS.md",
+}
+
+SUPPORTED_RUNTIMES = ("claude", "opencode")
 
 # Generated-tree files that map to user-owned destinations or need special
 # placement, handled outside the generic recursive copy.
@@ -67,13 +59,20 @@ REQUIRED_FILES = [
 #   gitignore  -> .gitignore      (section-merged, not a plain copy)
 SPECIAL_SOURCE_FILES = {"config.md", "gitignore"}
 
+# Files that, once present in the target, are never overwritten even with
+# --update (the user owns them). Expressed as target-relative paths.
+USER_OWNED_FILES = {
+    ".ppt/config.md",
+    ".claude/settings.local.json",
+    "opencode.json",
+}
+
 SYSTEM = platform.system()  # 'Darwin', 'Linux', 'Windows'
 
+# Runtime-neutral workspace directories created in every target. Runtime config
+# directories (.claude/..., .opencode/...) are created implicitly by the
+# recursive copy of the rendered tree.
 DIRECTORIES = [
-    ".claude/commands",
-    ".claude/skills/ppt-studio/references",
-    ".claude/agents",
-    ".claude/hooks",
     ".ppt/decks",
     ".ppt/logs",
     "scripts",
@@ -188,7 +187,7 @@ def copy_and_overwrite(src: Path, dst: Path) -> None:
 # ─── Setup steps ─────────────────────────────────────────────────────
 
 
-def validate_templates(src_root: Path) -> None:
+def validate_templates(src_root: Path, runtime: str) -> None:
     """Ensure the rendered runtime tree and its required files exist."""
     if not src_root.is_dir():
         print(
@@ -197,7 +196,7 @@ def validate_templates(src_root: Path) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    missing = [f for f in REQUIRED_FILES if not (src_root / f).exists()]
+    missing = [f for f in required_files(runtime) if not (src_root / f).exists()]
     if missing:
         print("Error: missing rendered files:", file=sys.stderr)
         for f in missing:
@@ -225,9 +224,14 @@ def copy_system_files(target: Path, src_root: Path, copy_fn) -> None:
         if not src.is_file():
             continue
         rel = src.relative_to(src_root)
-        if str(rel) in SPECIAL_SOURCE_FILES:
+        # Use posix-style keys so set membership works on Windows too.
+        rel_key = rel.as_posix()
+        if rel_key in SPECIAL_SOURCE_FILES:
             continue
-        copy_fn(src, target / rel)
+        # User-owned files (e.g. opencode.json) are never overwritten, even in
+        # --update mode: force copy_if_missing regardless of the active copy_fn.
+        fn = copy_if_missing if rel_key in USER_OWNED_FILES else copy_fn
+        fn(src, target / rel)
 
 
 def copy_user_files(target: Path, src_root: Path) -> None:
@@ -311,22 +315,36 @@ def setup_python_venv(target: Path, update_mode: bool) -> None:
     venv_dir = target / ".venv"
     pip = venv_pip(target)
 
+    req = target / "requirements.txt"
+
+    def pip_install() -> None:
+        # Non-fatal: a failed/absent pip must not abort stamping. File stamping
+        # has already completed; deps can be installed later by the user.
+        try:
+            if not pip.exists():
+                raise FileNotFoundError(pip)
+            subprocess.run(
+                [str(pip), "install", "-q", "-r", str(req)], check=True
+            )
+        except (subprocess.SubprocessError, OSError) as exc:
+            print(f"  Warning: pip install skipped ({exc}).", file=sys.stderr)
+            print(f"    Run later: {pip} install -r {req}", file=sys.stderr)
+
     if not venv_dir.exists():
-        print(f"  Creating venv with {python}...")
-        subprocess.run([python, "-m", "venv", str(venv_dir)], check=True)
+        try:
+            print(f"  Creating venv with {python}...")
+            subprocess.run([python, "-m", "venv", str(venv_dir)], check=True)
+        except (subprocess.SubprocessError, OSError) as exc:
+            print(f"  Warning: venv creation skipped ({exc}).", file=sys.stderr)
+            print(f"    Run later: {python} -m venv {venv_dir}", file=sys.stderr)
+            return
         print("  Installing pip dependencies...")
-        subprocess.run(
-            [str(pip), "install", "-q", "-r", str(target / "requirements.txt")],
-            check=True,
-        )
+        pip_install()
         print(f"  Python venv ready: {venv_dir}")
     else:
         if update_mode:
             print("  Updating pip dependencies...")
-            subprocess.run(
-                [str(pip), "install", "-q", "-r", str(target / "requirements.txt")],
-                check=True,
-            )
+            pip_install()
         else:
             print("  skip (exists): .venv")
 
@@ -378,7 +396,12 @@ def check_system_dependencies() -> bool:
     return soffice is not None
 
 
-def print_summary(target: Path, update_mode: bool, soffice_found: bool) -> None:
+RUNTIME_LABEL = {"claude": "Claude Code", "opencode": "OpenCode"}
+
+
+def print_summary(
+    target: Path, runtime: str, update_mode: bool, soffice_found: bool
+) -> None:
     """Print final summary."""
     print()
     print("=" * 64)
@@ -392,7 +415,7 @@ def print_summary(target: Path, update_mode: bool, soffice_found: bool) -> None:
         print()
         print("Next steps:")
         print(f"  1. cd {target}")
-        print("  2. Open Claude Code in this directory")
+        print(f"  2. Open {RUNTIME_LABEL[runtime]} in this directory")
         print("  3. Try these commands:")
         print("     /create-deck    — brainstorm + plan-driven creation")
         print("     /improve-deck   — review + edit an existing deck")
@@ -400,6 +423,8 @@ def print_summary(target: Path, update_mode: bool, soffice_found: bool) -> None:
         print("     /review          — analyze a deck or document")
         print("     /create          — build slides (plan or direct mode)")
         print("     /edit            — modify existing slides")
+        if runtime == "opencode":
+            print("     /status          — show active decks and their phase")
 
     if not soffice_found:
         print()
@@ -414,20 +439,29 @@ def print_summary(target: Path, update_mode: bool, soffice_found: bool) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Set up a directory as a PPT Studio workspace for Claude Code.",
+        description="Set up a directory as a PPT Studio workspace for Claude Code or OpenCode.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
+Runtimes (--runtime):
+  claude    Claude Code: CLAUDE.md + .claude/{commands,skills,agents,hooks}
+  opencode  OpenCode: AGENTS.md + opencode.json + .opencode/{command,agent,skills}
+
 System files (refreshed with --update):
-  CLAUDE.md, .claude/commands/*, .claude/skills/*, .claude/agents/*,
-  .claude/hooks/*, .claude/settings.json, scripts/*, themes/*,
+  instruction doc, runtime command/skill/agent files, scripts/*, themes/*,
   docs/*, package.json, requirements.txt
 
-User files (never overwritten):
-  .ppt/config.md, .claude/settings.local.json, .ppt/decks/*
+User files (never overwritten, even with --update):
+  .ppt/config.md, .claude/settings.local.json, opencode.json, .ppt/decks/*
   (plans, reviews, builds), templates/*, assets/*
 """,
     )
     parser.add_argument("target", help="Directory to set up as a PPT Studio workspace")
+    parser.add_argument(
+        "--runtime",
+        choices=SUPPORTED_RUNTIMES,
+        default=DEFAULT_RUNTIME,
+        help=f"Target agent runtime (default: {DEFAULT_RUNTIME})",
+    )
     parser.add_argument(
         "--update", action="store_true",
         help="Refresh system files only (preserves user files)",
@@ -444,12 +478,12 @@ User files (never overwritten):
         print(f"Error: target directory does not exist: {target}", file=sys.stderr)
         sys.exit(1)
 
-    src_root = runtime_root(DEFAULT_RUNTIME)
-    validate_templates(src_root)
+    src_root = runtime_root(args.runtime)
+    validate_templates(src_root, args.runtime)
 
     copy_fn = copy_and_overwrite if args.update else copy_if_missing
 
-    print(f"Setting up PPT Studio in: {target}")
+    print(f"Setting up PPT Studio ({RUNTIME_LABEL[args.runtime]}) in: {target}")
     print(f"Platform: {SYSTEM}")
     print()
 
@@ -462,7 +496,7 @@ User files (never overwritten):
     setup_python_venv(target, args.update)
     setup_npm(target, args.update)
     soffice_found = check_system_dependencies()
-    print_summary(target, args.update, soffice_found)
+    print_summary(target, args.runtime, args.update, soffice_found)
 
 
 if __name__ == "__main__":
