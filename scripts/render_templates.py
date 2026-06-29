@@ -31,7 +31,7 @@ CORE = REPO_ROOT / "core"
 ADAPTERS = REPO_ROOT / "adapters"
 GENERATED = REPO_ROOT / "generated"
 
-RUNTIMES = ("claude",)
+RUNTIMES = ("claude", "opencode")
 
 # Per-runtime placement + token configuration.
 #
@@ -41,17 +41,36 @@ RUNTIMES = ("claude",)
 # skills, agents, instruction doc). Wave 1 uses an empty token map for Claude so
 # output is byte-identical to the legacy templates.
 RUNTIME_CONFIG = {
+    # Claude is the identity baseline: each token maps back to the canonical
+    # Claude-dialect string, so generated/claude/ stays byte-identical to the
+    # legacy templates/ output even though core/ now carries {{TOKENS}}.
     "claude": {
         "instruction_doc": "CLAUDE.md",
         "command_dir": ".claude/commands",
         "skill_dir": ".claude/skills",
         "agent_dir": ".claude/agents",
-        "tokens": {},
+        "tokens": {
+            "{{RUNTIME_NAME}}": "Claude Code",
+            "{{INSTRUCTION_DOC}}": "CLAUDE.md",
+            "{{SKILL_DIR}}": ".claude/skills",
+            "{{AGENT_DIR}}": ".claude/agents",
+        },
+    },
+    # OpenCode uses AGENTS.md as the instruction doc, singular agent/command
+    # dirs (verified against the opencode 1.17.9 loader), and plural skills/.
+    "opencode": {
+        "instruction_doc": "AGENTS.md",
+        "command_dir": ".opencode/command",
+        "skill_dir": ".opencode/skills",
+        "agent_dir": ".opencode/agent",
+        "tokens": {
+            "{{RUNTIME_NAME}}": "OpenCode",
+            "{{INSTRUCTION_DOC}}": "AGENTS.md",
+            "{{SKILL_DIR}}": ".opencode/skills",
+            "{{AGENT_DIR}}": ".opencode/agent",
+        },
     },
 }
-
-# Text file groups that receive token substitution.
-TEXT_SUFFIXES = {".md"}
 
 
 def fail(msg: str) -> None:
@@ -66,8 +85,14 @@ def apply_tokens(text: str, tokens: dict[str, str]) -> str:
 
 
 def copy_file(src: Path, dst: Path, tokens: dict[str, str]) -> None:
+    """Copy src to dst, substituting tokens when a non-empty token map is given.
+
+    The CALLER decides whether a file is tokenized by passing tokens or {}.
+    Files that must stay verbatim (themes, scripts, requirements.txt, config.md,
+    gitignore, opencode.json) are always copied with an empty token map.
+    """
     dst.parent.mkdir(parents=True, exist_ok=True)
-    if tokens and src.suffix in TEXT_SUFFIXES:
+    if tokens:
         dst.write_text(apply_tokens(src.read_text(), tokens))
         shutil.copymode(src, dst)
     else:
@@ -78,6 +103,55 @@ def copy_glob(src_dir: Path, pattern: str, dst_dir: Path, tokens: dict[str, str]
     for f in sorted(src_dir.glob(pattern)):
         if f.is_file():
             copy_file(f, dst_dir / f.name, tokens)
+
+
+# OpenCode subagent frontmatter, keyed by core agent filename. Description is
+# the routing hint the primary uses to delegate; mode: subagent registers it as
+# a delegatable helper (not a user-driven primary). These agents are read-only
+# advisors invoked by the main session, mirroring the prose-driven spawn model.
+OPENCODE_AGENT_FRONTMATTER = {
+    "style-extractor.md": (
+        "Extracts the visual style (colors, fonts, layout language) from a "
+        "reference .pptx or slide images and returns a concise style report."
+    ),
+    "slide-builder.md": (
+        "Builds an assigned range of slides from an approved content plan and "
+        "style plan, writing its slide code to a designated file."
+    ),
+    "slide-editor.md": (
+        "Applies a scoped set of edits to existing slides per an approved edit "
+        "plan, preserving deck style and structure."
+    ),
+    "qa-reviewer.md": (
+        "Inspects rendered slides with fresh eyes for layout, spacing, "
+        "contrast, typography, diagram, and consistency issues; writes a QA "
+        "report and returns a summary."
+    ),
+}
+
+
+def opencode_agent_frontmatter(name: str) -> str:
+    desc = OPENCODE_AGENT_FRONTMATTER.get(name)
+    if desc is None:
+        fail(f"missing OpenCode frontmatter for agent: {name}")
+    stem = name[:-3] if name.endswith(".md") else name
+    return f"---\nname: {stem}\ndescription: {desc}\nmode: subagent\n---\n\n"
+
+
+def render_agents(runtime: str, dst_dir: Path, tokens: dict[str, str]) -> None:
+    """Render core agent prompt bodies into the runtime's agent dir.
+
+    Claude: plain prompt body, byte-identical to the legacy templates.
+    OpenCode: same body with OpenCode subagent frontmatter prepended.
+    """
+    for f in sorted((CORE / "agents").glob("*.md")):
+        body = apply_tokens(f.read_text(), tokens) if tokens else f.read_text()
+        if runtime == "opencode":
+            body = opencode_agent_frontmatter(f.name) + body
+        dst = dst_dir / f.name
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(body)
+        shutil.copymode(f, dst)
 
 
 def render_runtime(runtime: str, out_root: Path) -> Path:
@@ -103,36 +177,58 @@ def render_runtime(runtime: str, out_root: Path) -> Path:
         out / cfg["skill_dir"] / "ppt-studio/references",
         tokens,
     )
-    # Agents
-    copy_glob(CORE / "agents", "*.md", out / cfg["agent_dir"], tokens)
+    # Agents — Claude uses the plain prompt body (no frontmatter); OpenCode
+    # needs `name`/`description`/`mode: subagent` frontmatter prepended so the
+    # loader registers them as native subagents.
+    render_agents(runtime, out / cfg["agent_dir"], tokens)
     # Scripts (runtime-neutral, no token substitution)
     copy_glob(CORE / "scripts", "*", out / "scripts", {})
     # Themes (runtime-neutral)
     copy_glob(CORE / "themes", "*.json", out / "themes", {})
-    # Docs (runtime-neutral)
-    copy_glob(CORE / "docs", "*.md", out / "docs", {})
-    # Root package files (runtime-neutral)
-    copy_file(CORE / "package.json", out / "package.json", {})
+    # Docs (carry runtime tokens: product-overview references the instruction
+    # doc and skill dir)
+    copy_glob(CORE / "docs", "*.md", out / "docs", tokens)
+    # Root package files (package.json carries {{RUNTIME_NAME}})
+    copy_file(CORE / "package.json", out / "package.json", tokens)
     copy_file(CORE / "requirements.txt", out / "requirements.txt", {})
     # config.md and gitignore are kept at the generated-tree root; the installer
     # places them at their final destinations (.ppt/config.md, .gitignore).
     copy_file(CORE / "config.md", out / "config.md", {})
     copy_file(CORE / "gitignore", out / "gitignore", {})
+    # Shared instruction doc -> the runtime's instruction-doc filename at root
+    # (CLAUDE.md for Claude, AGENTS.md for OpenCode), token-substituted.
+    copy_file(CORE / "instruction-doc.md", out / cfg["instruction_doc"], tokens)
 
     # --- Per-runtime adapter mechanics (overlaid, may token-substitute) ---
-    render_claude_adapter(out, tokens)
+    if runtime == "claude":
+        render_claude_adapter(out, tokens)
+    elif runtime == "opencode":
+        render_opencode_adapter(out, tokens)
+    else:  # pragma: no cover - guarded by RUNTIME_CONFIG
+        fail(f"no adapter renderer for runtime: {runtime}")
 
     return out
 
 
 def render_claude_adapter(out: Path, tokens: dict[str, str]) -> None:
     adapter = ADAPTERS / "claude"
-    # Instruction doc at root
-    copy_file(adapter / "CLAUDE.md", out / "CLAUDE.md", tokens)
-    # settings.json -> .claude/settings.json
+    # Instruction doc (CLAUDE.md) is rendered from core/instruction-doc.md.
+    # settings.json -> .claude/settings.json (Claude hook wiring).
     copy_file(adapter / "settings.json", out / ".claude/settings.json", {})
     # Hooks
     copy_glob(adapter / "hooks", "*.py", out / ".claude/hooks", {})
+
+
+def render_opencode_adapter(out: Path, tokens: dict[str, str]) -> None:
+    adapter = ADAPTERS / "opencode"
+    # Instruction doc (AGENTS.md) is rendered from core/instruction-doc.md.
+    # opencode.json config at root (verbatim).
+    copy_file(adapter / "opencode.json", out / "opencode.json", {})
+    # OpenCode has no SessionStart hook; the Claude session_start/setup hooks are
+    # replaced by an explicit /status command + a status script. These are
+    # OpenCode-only so Claude output is unaffected.
+    copy_glob(adapter / "command", "*.md", out / ".opencode/command", tokens)
+    copy_glob(adapter / "scripts", "*.py", out / "scripts", {})
 
 
 def render_all(out_root: Path, only: str | None) -> None:

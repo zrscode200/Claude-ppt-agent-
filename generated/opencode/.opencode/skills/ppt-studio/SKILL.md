@@ -128,7 +128,7 @@ For decks with >12 slides:
 3. **Spawn `slide-builder` agents** — each gets:
    - Their assigned slides from the **content plan** (what to build)
    - The **style plan** or theme JSON (how it looks)
-   - PptxGenJS API reference (`{{SKILL_DIR}}/ppt-studio/references/pptxgenjs-guide.md`)
+   - PptxGenJS API reference (`.opencode/skills/ppt-studio/references/pptxgenjs-guide.md`)
    - Output file path — the agent writes its code to this file and returns only a confirmation
    - If a plan was skipped, pass the defaults being used instead
 4. **Verify** — confirm each section file exists after builders return
@@ -178,7 +178,7 @@ Always use sub-agents for visual QA:
 
 ## References
 
-- Design guide: `{{SKILL_DIR}}/ppt-studio/references/design-guide.md`
-- PptxGenJS API: `{{SKILL_DIR}}/ppt-studio/references/pptxgenjs-guide.md`
-- Editing guide: `{{SKILL_DIR}}/ppt-studio/references/editing-guide.md`
-- Sub-agent prompts: `{{SKILL_DIR}}/ppt-studio/references/subagent-prompts.md`
+- Design guide: `.opencode/skills/ppt-studio/references/design-guide.md`
+- PptxGenJS API: `.opencode/skills/ppt-studio/references/pptxgenjs-guide.md`
+- Editing guide: `.opencode/skills/ppt-studio/references/editing-guide.md`
+- Sub-agent prompts: `.opencode/skills/ppt-studio/references/subagent-prompts.md`

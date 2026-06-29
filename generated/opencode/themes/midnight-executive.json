@@ -1,0 +1,19 @@
+{
+  "name": "Midnight Executive",
+  "colors": {
+    "primary": "1E2761",
+    "secondary": "CADCFC",
+    "accent": "FFFFFF",
+    "bg_dark": "0F1B3D",
+    "bg_light": "F5F7FA",
+    "text_on_dark": "FFFFFF",
+    "text_on_light": "1E2761",
+    "muted": "8892B0"
+  },
+  "fonts": {
+    "header": "Georgia",
+    "body": "Calibri"
+  },
+  "chart_colors": ["1E2761", "CADCFC", "5A7DBF", "8892B0"],
+  "background_strategy": "dark-sandwich"
+}

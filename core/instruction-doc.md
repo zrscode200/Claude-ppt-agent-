@@ -39,11 +39,11 @@ The PPT Studio skill detects intent and routes to the right command:
 This repo is fully standalone. All tools are included:
 
 ### Creation
-- **PptxGenJS** for creating decks from scratch (see `.claude/skills/ppt-studio/references/pptxgenjs-guide.md`)
+- **PptxGenJS** for creating decks from scratch (see `{{SKILL_DIR}}/ppt-studio/references/pptxgenjs-guide.md`)
 - **python-pptx** for programmatic reading/editing of `.pptx` files
 
 ### Editing
-- **Unpack/edit/pack** workflow for XML-level editing (see `.claude/skills/ppt-studio/references/editing-guide.md`)
+- **Unpack/edit/pack** workflow for XML-level editing (see `{{SKILL_DIR}}/ppt-studio/references/editing-guide.md`)
 
 ### Scripts (in `scripts/`)
 | Script | Usage |
@@ -258,7 +258,7 @@ For ≤12 slides: main agent writes a single script directly (no sub-agents, no 
 - **Commit to a motif** — pick one distinctive element and carry it across every slide
 - **Dark/light contrast** — dark title + conclusion slides, light content slides (or commit to dark throughout)
 
-See `.claude/skills/ppt-studio/references/design-guide.md` for full design reference.
+See `{{SKILL_DIR}}/ppt-studio/references/design-guide.md` for full design reference.
 
 ## Quality Bar
 

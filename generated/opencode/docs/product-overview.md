@@ -84,6 +84,6 @@ A few things the agent explicitly doesn't try to be:
 
 ## Where to go next
 
-- `{{INSTRUCTION_DOC}}` at the workspace root is the agent's full operating manual — detailed rules, file conventions, sub-agent invocation criteria.
-- `{{SKILL_DIR}}/ppt-studio/references/` holds the design guide, the PptxGenJS reference, the editing reference, and the sub-agent prompt library. These are what the agent reads when it needs to know how to do something specific.
+- `AGENTS.md` at the workspace root is the agent's full operating manual — detailed rules, file conventions, sub-agent invocation criteria.
+- `.opencode/skills/ppt-studio/references/` holds the design guide, the PptxGenJS reference, the editing reference, and the sub-agent prompt library. These are what the agent reads when it needs to know how to do something specific.
 - `.ppt/config.md` is where you set autonomy mode and default theme.

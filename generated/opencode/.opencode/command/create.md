@@ -39,7 +39,7 @@ Slides:
   5. Conclusion — next steps
 ```
 
-Iterate piece by piece with the user. When happy, write `content-plan-draft-1.md` in `.ppt/decks/<deck-name>/` following the format in {{INSTRUCTION_DOC}}.
+Iterate piece by piece with the user. When happy, write `content-plan-draft-1.md` in `.ppt/decks/<deck-name>/` following the format in AGENTS.md.
 
 If changes requested after writing: write `content-plan-draft-2.md` (never overwrite). When approved → copy to `content-plan-approved.md`.
 

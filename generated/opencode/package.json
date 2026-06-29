@@ -1,7 +1,7 @@
 {
   "name": "ppt-studio",
   "version": "1.0.0",
-  "description": "PPT creation studio powered by {{RUNTIME_NAME}}",
+  "description": "PPT creation studio powered by OpenCode",
   "private": true,
   "dependencies": {
     "pptxgenjs": "^3.12.0",

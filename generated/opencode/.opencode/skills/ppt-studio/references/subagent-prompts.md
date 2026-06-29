@@ -30,7 +30,7 @@ Study every slide image and extract the visual design system across these 8 dime
 
 Map observed colors to theme slots: primary, secondary, accent, bg_dark, bg_light, text_on_dark, text_on_light, muted.
 
-Read the agent definition at {{AGENT_DIR}}/style-extractor.md for the full checklist and output format.
+Read the agent definition at .opencode/agent/style-extractor.md for the full checklist and output format.
 
 Read and analyze these images:
 {IMAGE_PATHS_WITH_DESCRIPTIONS}
@@ -69,7 +69,7 @@ Write your function to: `{OUTPUT_FILE_PATH}`
 8. Every slide MUST have a visual element (shape, chart, icon)
 9. Vary layouts — don't repeat the same layout on consecutive slides
 
-Read the agent definition at {{AGENT_DIR}}/slide-builder.md for full rules.
+Read the agent definition at .opencode/agent/slide-builder.md for full rules.
 
 Write the function to the output file. Reply with ONLY: "Wrote buildSlides_{START}_{END} to {OUTPUT_FILE_PATH} (N slides)"
 Do NOT include code in your response.
@@ -104,7 +104,7 @@ You are a slide editor. Edit the following slides in the unpacked presentation.
 - When removing elements, remove the entire group (not just text)
 - Use XML entities for smart quotes
 
-Read the agent definition at {{AGENT_DIR}}/slide-editor.md for full rules.
+Read the agent definition at .opencode/agent/slide-editor.md for full rules.
 ```
 
 Include only the relevant section(s) — if the edit is content-only, omit the style changes section and vice versa.
@@ -141,7 +141,7 @@ Write your full report to: `{OUTPUT_FILE_PATH}`
 ## Expected Visual Style (from style plan — your section only)
 {SECTION_STYLE_PLAN}
 
-Read the agent definition at {{AGENT_DIR}}/qa-reviewer.md for the full section mode checklist and output format.
+Read the agent definition at .opencode/agent/qa-reviewer.md for the full section mode checklist and output format.
 
 For each slide in your section, list ALL issues found, including minor ones. Report severity: CRITICAL, IMPORTANT, or MINOR.
 
@@ -182,7 +182,7 @@ Write your full report to: `{OUTPUT_FILE_PATH}`
 ## Expected Visual Style (from style plan — full)
 {FULL_STYLE_PLAN}
 
-Read the agent definition at {{AGENT_DIR}}/qa-reviewer.md for the full holistic mode checklist and output format.
+Read the agent definition at .opencode/agent/qa-reviewer.md for the full holistic mode checklist and output format.
 
 Read and analyze these images:
 {ALL_IMAGE_PATHS_WITH_DESCRIPTIONS}

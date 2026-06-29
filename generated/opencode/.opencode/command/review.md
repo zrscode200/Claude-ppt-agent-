@@ -119,4 +119,4 @@ If this Review is part of a composed workflow, the report is always saved — it
 
 ## Visual QA (for style scope)
 
-Spawn QA agents per the standard pattern (see `subagent-prompts.md` for section and holistic prompt templates). The full inspection checklists live in `{{AGENT_DIR}}/qa-reviewer.md` — do not duplicate them here.
+Spawn QA agents per the standard pattern (see `subagent-prompts.md` for section and holistic prompt templates). The full inspection checklists live in `.opencode/agent/qa-reviewer.md` — do not duplicate them here.
