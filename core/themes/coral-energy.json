@@ -1,0 +1,19 @@
+{
+  "name": "Coral Energy",
+  "colors": {
+    "primary": "F96167",
+    "secondary": "F9E795",
+    "accent": "2F3C7E",
+    "bg_dark": "2F3C7E",
+    "bg_light": "FFF9F0",
+    "text_on_dark": "FFFFFF",
+    "text_on_light": "2F3C7E",
+    "muted": "A0A4C1"
+  },
+  "fonts": {
+    "header": "Arial Black",
+    "body": "Arial"
+  },
+  "chart_colors": ["F96167", "F9E795", "2F3C7E", "F4A261"],
+  "background_strategy": "dark-sandwich"
+}

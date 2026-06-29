@@ -1,0 +1,19 @@
+{
+  "name": "Forest & Moss",
+  "colors": {
+    "primary": "2C5F2D",
+    "secondary": "97BC62",
+    "accent": "F5F5F5",
+    "bg_dark": "1A3C1B",
+    "bg_light": "F7FAF4",
+    "text_on_dark": "F5F5F5",
+    "text_on_light": "2C5F2D",
+    "muted": "7A9A6B"
+  },
+  "fonts": {
+    "header": "Trebuchet MS",
+    "body": "Calibri"
+  },
+  "chart_colors": ["2C5F2D", "97BC62", "5E8B5A", "C4D9A0"],
+  "background_strategy": "dark-sandwich"
+}

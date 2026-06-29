@@ -1,0 +1,19 @@
+{
+  "name": "Charcoal Minimal",
+  "colors": {
+    "primary": "36454F",
+    "secondary": "F2F2F2",
+    "accent": "212121",
+    "bg_dark": "212121",
+    "bg_light": "FAFAFA",
+    "text_on_dark": "F2F2F2",
+    "text_on_light": "36454F",
+    "muted": "9E9E9E"
+  },
+  "fonts": {
+    "header": "Arial Black",
+    "body": "Calibri"
+  },
+  "chart_colors": ["36454F", "9E9E9E", "212121", "BDBDBD"],
+  "background_strategy": "dark-sandwich"
+}

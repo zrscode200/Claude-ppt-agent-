@@ -22,28 +22,36 @@ import sys
 from pathlib import Path
 
 TOOLKIT_DIR = Path(__file__).resolve().parent.parent
-TEMPLATES = TOOLKIT_DIR / "templates"
+GENERATED = TOOLKIT_DIR / "generated"
+DEFAULT_RUNTIME = "claude"
 
+# The installer copies from a pre-rendered tree in generated/<runtime>/. It does
+# not render; run scripts/render_templates.py to (re)build generated/.
+def runtime_root(runtime: str) -> Path:
+    return GENERATED / runtime
+
+# Required files validated before copy, expressed relative to the rendered
+# generated/<runtime>/ tree (which already mirrors the final stamped layout).
 REQUIRED_FILES = [
     "CLAUDE.md",
-    "settings.json",
+    ".claude/settings.json",
     "config.md",
     "package.json",
     "requirements.txt",
     "gitignore",
-    "commands/review.md",
-    "commands/create.md",
-    "commands/edit.md",
-    "commands/create-deck.md",
-    "commands/improve-deck.md",
-    "commands/deck-from-doc.md",
-    "skills/ppt-studio/SKILL.md",
-    "agents/style-extractor.md",
-    "agents/slide-builder.md",
-    "agents/slide-editor.md",
-    "agents/qa-reviewer.md",
-    "hooks/setup.py",
-    "hooks/session_start.py",
+    ".claude/commands/review.md",
+    ".claude/commands/create.md",
+    ".claude/commands/edit.md",
+    ".claude/commands/create-deck.md",
+    ".claude/commands/improve-deck.md",
+    ".claude/commands/deck-from-doc.md",
+    ".claude/skills/ppt-studio/SKILL.md",
+    ".claude/agents/style-extractor.md",
+    ".claude/agents/slide-builder.md",
+    ".claude/agents/slide-editor.md",
+    ".claude/agents/qa-reviewer.md",
+    ".claude/hooks/setup.py",
+    ".claude/hooks/session_start.py",
     "scripts/unpack.py",
     "scripts/pack.py",
     "scripts/clean.py",
@@ -52,6 +60,12 @@ REQUIRED_FILES = [
     "scripts/soffice.py",
     "docs/product-overview.md",
 ]
+
+# Generated-tree files that map to user-owned destinations or need special
+# placement, handled outside the generic recursive copy.
+#   config.md  -> .ppt/config.md  (user file, never overwritten)
+#   gitignore  -> .gitignore      (section-merged, not a plain copy)
+SPECIAL_SOURCE_FILES = {"config.md", "gitignore"}
 
 SYSTEM = platform.system()  # 'Darwin', 'Linux', 'Windows'
 
@@ -174,13 +188,21 @@ def copy_and_overwrite(src: Path, dst: Path) -> None:
 # ─── Setup steps ─────────────────────────────────────────────────────
 
 
-def validate_templates() -> None:
-    """Ensure all required template files exist."""
-    missing = [f for f in REQUIRED_FILES if not (TEMPLATES / f).exists()]
+def validate_templates(src_root: Path) -> None:
+    """Ensure the rendered runtime tree and its required files exist."""
+    if not src_root.is_dir():
+        print(
+            f"Error: missing rendered tree: {src_root}\n"
+            f"  Run: python3.12 scripts/render_templates.py",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    missing = [f for f in REQUIRED_FILES if not (src_root / f).exists()]
     if missing:
-        print("Error: missing template files:", file=sys.stderr)
+        print("Error: missing rendered files:", file=sys.stderr)
         for f in missing:
-            print(f"  templates/{f}", file=sys.stderr)
+            print(f"  {src_root.name}/{f}", file=sys.stderr)
+        print("  Run: python3.12 scripts/render_templates.py", file=sys.stderr)
         sys.exit(1)
 
 
@@ -190,64 +212,35 @@ def create_directories(target: Path) -> None:
         (target / d).mkdir(parents=True, exist_ok=True)
 
 
-def copy_system_files(target: Path, copy_fn) -> None:
-    """Copy all system files using the given copy function."""
+def copy_system_files(target: Path, src_root: Path, copy_fn) -> None:
+    """Copy all system files from the rendered runtime tree.
+
+    The rendered tree (generated/<runtime>/) already mirrors the final stamped
+    layout, so this is a recursive copy: every file maps to the same relative
+    path under the target. Special source files (config.md, gitignore) are
+    handled elsewhere (user file / section-merged) and skipped here.
+    """
     print("System files:")
-
-    # CLAUDE.md
-    copy_fn(TEMPLATES / "CLAUDE.md", target / "CLAUDE.md")
-
-    # Settings
-    copy_fn(TEMPLATES / "settings.json", target / ".claude" / "settings.json")
-
-    # Commands
-    for f in sorted((TEMPLATES / "commands").glob("*.md")):
-        copy_fn(f, target / ".claude" / "commands" / f.name)
-
-    # Skills
-    copy_fn(
-        TEMPLATES / "skills" / "ppt-studio" / "SKILL.md",
-        target / ".claude" / "skills" / "ppt-studio" / "SKILL.md",
-    )
-    for f in sorted((TEMPLATES / "skills" / "ppt-studio" / "references").glob("*.md")):
-        copy_fn(f, target / ".claude" / "skills" / "ppt-studio" / "references" / f.name)
-
-    # Agents
-    for f in sorted((TEMPLATES / "agents").glob("*.md")):
-        copy_fn(f, target / ".claude" / "agents" / f.name)
-
-    # Hooks
-    for f in sorted((TEMPLATES / "hooks").glob("*.py")):
-        copy_fn(f, target / ".claude" / "hooks" / f.name)
-
-    # Scripts
-    for f in sorted((TEMPLATES / "scripts").glob("*.py")):
-        copy_fn(f, target / "scripts" / f.name)
-
-    # Themes
-    for f in sorted((TEMPLATES / "themes").glob("*.json")):
-        copy_fn(f, target / "themes" / f.name)
-
-    # Docs
-    for f in sorted((TEMPLATES / "docs").glob("*.md")):
-        copy_fn(f, target / "docs" / f.name)
-
-    # Package files
-    copy_fn(TEMPLATES / "package.json", target / "package.json")
-    copy_fn(TEMPLATES / "requirements.txt", target / "requirements.txt")
+    for src in sorted(src_root.rglob("*")):
+        if not src.is_file():
+            continue
+        rel = src.relative_to(src_root)
+        if str(rel) in SPECIAL_SOURCE_FILES:
+            continue
+        copy_fn(src, target / rel)
 
 
-def copy_user_files(target: Path) -> None:
+def copy_user_files(target: Path, src_root: Path) -> None:
     """Copy user files (never overwrite)."""
     print("\nUser files:")
-    copy_if_missing(TEMPLATES / "config.md", target / ".ppt" / "config.md")
+    copy_if_missing(src_root / "config.md", target / ".ppt" / "config.md")
 
 
-def setup_gitignore(target: Path, update_mode: bool) -> None:
+def setup_gitignore(target: Path, src_root: Path, update_mode: bool) -> None:
     """Set up .gitignore with PPT Studio entries."""
     print("\nGitignore:")
     gitignore = target / ".gitignore"
-    template_content = (TEMPLATES / "gitignore").read_text()
+    template_content = (src_root / "gitignore").read_text()
 
     if gitignore.exists():
         existing = gitignore.read_text()
@@ -451,7 +444,8 @@ User files (never overwritten):
         print(f"Error: target directory does not exist: {target}", file=sys.stderr)
         sys.exit(1)
 
-    validate_templates()
+    src_root = runtime_root(DEFAULT_RUNTIME)
+    validate_templates(src_root)
 
     copy_fn = copy_and_overwrite if args.update else copy_if_missing
 
@@ -460,9 +454,9 @@ User files (never overwritten):
     print()
 
     create_directories(target)
-    copy_system_files(target, copy_fn)
-    copy_user_files(target)
-    setup_gitignore(target, args.update)
+    copy_system_files(target, src_root, copy_fn)
+    copy_user_files(target, src_root)
+    setup_gitignore(target, src_root, args.update)
     setup_gitkeep(target)
     setup_git(target)
     setup_python_venv(target, args.update)
